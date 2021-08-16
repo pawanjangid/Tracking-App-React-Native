@@ -3,6 +3,7 @@ import {
   StyleSheet,
   Text,
   View,
+  Image,
   BackHandler
 } from 'react-native';
 import { TabView, SceneMap,TabBar } from 'react-native-tab-view';
@@ -10,14 +11,20 @@ import { Ionicons } from '@expo/vector-icons'
 import Constant from 'expo-constants';
 
 const FirstRoute = () => (
-    <View style={{ flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor: '#d6d6d6'}} >
-        <Text>Ops! Not Found</Text>
+    <View style={{ flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor: '#f7f7f7'}} >
+        <Image source={require("../assets/record.png")} style={{height:100,width:80,resizeMode:"stretch"}} />
+        <View style={{padding:20}}>
+          <Text>No transactions record found</Text>
+        </View>
     </View>
   );
   
   const SecondRoute = () => (
-    <View style={{ flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor: '#d6d6d6'}}>
-        <Text>Ops! Not Found</Text>
+    <View style={{ flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor: '#f7f7f7'}}>
+        <Image source={require("../assets/record.png")} style={{height:100,width:80,resizeMode:"stretch"}} />
+        <View style={{padding:20}}>
+          <Text>No transactions record found</Text>
+        </View>
     </View>
   );
   
@@ -54,7 +61,7 @@ export default function BalanceDetail({navigation})  {
                 <Ionicons name="arrow-back-sharp" size={24} color="black" onPress={()=>navigation.navigate("Wallet")} />
                 </View>
                 <View style={styles.headerName}>
-                    <Text style={{fontSize:16,fontWeight:"bold"}}>Transaction History</Text>
+                    <Text style={{fontSize:16,fontWeight:"bold"}}>Balance History</Text>
                 </View>
             </View>
             <View style={styles.walletContainer}>

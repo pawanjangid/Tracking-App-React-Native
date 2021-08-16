@@ -13,9 +13,34 @@ export default function Register({navigation}) {
     const [termCheck,setTermCheck] = useState(false);
     const [policyCheck,setPolicyCheck] = useState(false);
     const [eye,setEye] = useState(false);
+    const [message,setMessage] = useState();
+
     function PressHandler() {
         Alert.alert("Phone: "+phone+" Password: "+password);
-        navigation.navigate("Home");
+
+        fetch('https://gettruckingbackend.herokuapp.com/users/', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email:mail,
+                phone: phone,
+                password: password
+            })
+        })
+            .then((response) => response.json())
+            .then((responseData) => {
+                    if(responseData.success === 1) {
+                        navigation.navigate('Root',{screen:"Login"});
+                    }else{
+                        setMessage(responseData.data)
+                    }
+                })
+            .catch((error) =>{
+                setMessage(error)
+            })
     }
 
   return (
@@ -91,7 +116,13 @@ export default function Register({navigation}) {
                             </View>
                     </View>
                     
-                        <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>{navigation.navigate("Home")}}>
+                    <View style={{justifyContent:"center",alignItems:"center"}}>
+                        <Text style={{padding:5,fontWeight:"bold",color:"red"}}>
+                            {message}
+                        </Text>
+                    </View>
+                    
+                        <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>{PressHandler()}}>
                             <View style={styles.buttonContainer} >
                                 <Text style={styles.buttontitle}>
                                     Sign Up

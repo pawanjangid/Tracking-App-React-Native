@@ -17,6 +17,10 @@ import Notifications from '../screens/Notification';
 import TopupList from '../screens/TopupList';
 import Checkout from '../screens/Checkout';
 import BalanceDetail from '../screens/BalanceDetail';
+import Coupons from '../screens/Coupons';
+import SelectVehicle from '../screens/SelectVehicle';
+import AdditionalService from '../screens/AdditionalService';
+import PlaceOrder from '../screens/PlaceOrder';
 const Stack = createStackNavigator();
 
 function HomeStack() {
@@ -29,9 +33,12 @@ function HomeStack() {
       <Stack.Screen name="Notification" component={Notifications} options={{ swipeEnabled: false }} />
       <Stack.Screen name="TopupList" component={TopupList} options={{ swipeEnabled: false }} />
       <Stack.Screen name="Checkout" component={Checkout} options={{ swipeEnabled: false }} />
+      <Stack.Screen name="Coupons" component={Coupons} options={{ swipeEnabled: false }} />
+      <Stack.Screen name="SelectVehicle" component={SelectVehicle} options={{ swipeEnabled: false }} />
+      <Stack.Screen name="AdditionalService" component={AdditionalService} options={{ swipeEnabled: false }} />
       <Stack.Screen name="BalanceDetail" component={BalanceDetail} options={{ swipeEnabled: false }} />
       <Stack.Screen name="More" component={More} options={{ swipeEnabled: false }} />
-      <Stack.Screen name="PlaceOrder" component={More} options={{ swipeEnabled: false }} />
+      <Stack.Screen name="PlaceOrder" component={PlaceOrder} options={{ swipeEnabled: false }} />
       <Stack.Screen name="MyOrders" component={MyOrder} options={{ swipeEnabled: false }} />
       <Stack.Screen name="TrackOrder" component={TrackOrder} options={{ swipeEnabled: false }} />
       <Stack.Screen name="ManageDriver" component={ManageDriver} options={{ swipeEnabled: false }} />

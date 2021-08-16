@@ -1,63 +1,37 @@
-import React,{useState} from "react"
+import React,{useState,useEffect} from "react"
 import {FlatList, StyleSheet,Text,View,TouchableOpacity,Image} from "react-native"
-import Constants from "expo-constants"
-import { FontAwesome5,MaterialIcons } from "@expo/vector-icons";
-
+import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function Country({navigation}) {
 
-    const [countries,setCountries] = useState([
-        {
-            key:"1",
-            name: "United States"
-        },
-        {
-            key:"2",
-            name: "United Kingdom"
-        },
-        {
-            key:"3",
-            name: "United States of Ireland"
-        },
-        {
-            key:"4",
-            name:"India"
-        },
-        {
-            key:"5",
-            name:"Singapore"
-        },
-        {
-            key:"6",
-            name:"China"
-        },
-        {
-            key:"7",
-            name:"Taivan"
-        },
-        {
-            key:"8",
-            name:"Canada"
-        },
-        {
-            key:"9",
-            name:"South Africa"
-        },
-        {
-            key:"10",
-            name:"Shree Lanka"
-        },
-        {
-            key:"11",
-            name:"Thailand"
-        }
-    ]);
+    const [countries,setCountries] = useState([]);
 
     const [country,setCountry] = useState('')
+    const [token,setToken] = useState();
+    useEffect(() => {
+
+
+        fetch('https://gettruckingbackend.herokuapp.com/users/countries')
+      .then((response) => response.json())
+      .then((json) => {setCountries(json.data)})
+      .catch((error) => console.error(error));
+
+
+    }, []);
+
+        useEffect(() => {
+        AsyncStorage.getItem('LOGIN_TOKEN').then((value) => {
+            setToken(value)
+        })
+        if(token!==null){
+            navigation.navigate('Home')
+        }
+        },[])
 
       const renderItem = ({ item }) => {
         return (
-            <TouchableOpacity key={item.key} onPress={()=>{navigation.navigate("GetStart")}}>
+            <TouchableOpacity onPress={()=>{navigation.navigate("GetStart")}}>
                 <View style={styles.ItemContainer}>
                     <View style={{width:"80%"}}>
                         <Text>{item.name}</Text>
@@ -82,7 +56,8 @@ function Country({navigation}) {
                 </View>
                 <FlatList
                 data={countries}
-                renderItem={renderItem}   
+                renderItem={renderItem}
+                keyExtractor={item => item.id.toString()}
                 />
             </View>
             <View style={{padding:10,paddingBottom:30}}>

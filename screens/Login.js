@@ -1,21 +1,66 @@
 import * as React from 'react';
-import {useState} from 'react';
+import {useState,useEffect} from 'react';
 import { StyleSheet, Text, View,CheckBox,TouchableHighlight } from 'react-native';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 import { AntDesign,MaterialCommunityIcons,Feather } from '@expo/vector-icons'; 
 import { TextInput } from 'react-native';
-import { Alert } from 'react-native';
 import Contstant from 'expo-constants'
 export default function Login({navigation}) {
 
-    const [phone,setPhone] = useState('');
-    const [password,setPassword] = useState('');
+    const [phone,setPhone] = useState();
+    const [password,setPassword] = useState();
     const [termCheck,setTermCheck] = useState(false);
     const [policyCheck,setPolicyCheck] = useState(false);
     const [eye,setEye] = useState(false);
-    function PressHandler() {
-        Alert.alert("Phone: "+phone+" Password: "+password);
-        navigation.navigate("Home");
+    const [message,setMessage] = useState();
+    const [token,setToken] = useState(null);
+    const PressHandler = async () => {
+        
+        try {
+
+            fetch('https://gettruckingbackend.herokuapp.com/users/login', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    phone: phone,
+                    password: password
+                })
+            })
+                .then((response) => response.json())
+                .then((responseData) => {
+                        if(responseData.success === 1) {
+                           setToken(responseData.token);
+                            console.log("done")
+                        }else{
+                            setMessage(responseData.data)
+                        }
+                    })
+                .catch((error) =>{
+                    setMessage(error)
+                })
+        }
+        catch (err) {
+            console.error(err);
+        }
+        if(token!==null){
+            await AsyncStorage.setItem('LOGIN_TOKEN',token);
+        }
     }
+
+
+    useEffect(() => {
+        AsyncStorage.getItem('LOGIN_TOKEN').then((value) => {
+          if(value!==null){
+            navigation.navigate('Home')
+          }
+        })
+      },[token])
 
   return (
             <View style={styles.container}>
@@ -26,6 +71,7 @@ export default function Login({navigation}) {
                     <Text style={styles.loginTitle}>
                         Login to Place Order
                     </Text>
+                    
                 </View>
                 <View style={styles.logincontainer}>
                     <View style={styles.Inputcontainer}>
@@ -50,7 +96,11 @@ export default function Login({navigation}) {
                             <TextInput style={styles.textinput}
                             secureTextEntry={true}
                             placeholder="Password"
-                            placeholderTextColor="#878787" />
+                            placeholderTextColor="#878787"
+                            value={password}
+                            onChangeText={(e)=>{setPassword(e)}}
+                            
+                            />
                             <View style={styles.iconContainer}>
                                 <Feather name={eye ? "eye" : "eye-off"} size={24} color="#878787" onPress={()=>{setEye(!eye)}} />
                             </View>
@@ -75,8 +125,14 @@ export default function Login({navigation}) {
                                 </Text>
                             </View>
                     </View>
-                    
-                        <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>{navigation.navigate("Home")}}>
+
+
+                    <View style={{justifyContent:"center",alignItems:"center"}}>
+                        <Text style={{padding:5,fontWeight:"bold",color:"red"}}>
+                            {message}
+                        </Text>
+                    </View>
+                        <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>{PressHandler()}}>
                             <View style={styles.buttonContainer} >
                                 <Text style={styles.buttontitle}>
                                     Login

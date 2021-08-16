@@ -7,9 +7,10 @@ import { Ionicons } from '@expo/vector-icons';
 import Notifications from './Notification';
 import Settings from './Settings';
 import Home from './Home';
-import Profile from './Profile';
-import Wallet from './Wallet';
 import Orders from './Orders';
+import Wallet from './Wallet';
+import MyDrivers from './MyDrivers';
+import HelpCenter from './HelpCenter';
 import HomeStack from '../routes/HomeStack';
 
 
@@ -56,16 +57,16 @@ export default function HomeRouter() {
         <Drawer.Screen name="Home" component={Home} options={{
                 drawerIcon:(tabInfo)=><AntDesign name="home" size={24} color={tabInfo.focused ? "white":"black"} />
             }} />
-        <Drawer.Screen name="Orders" component={Notifications} options={{
+        <Drawer.Screen name="Orders" component={Orders} options={{
                 drawerIcon:(tabInfo)=><AntDesign name="barschart" size={24} color={tabInfo.focused ? "white":"black"} />
             }} />
         <Drawer.Screen name="Wallet" component={Wallet} options={{
                 drawerIcon:(tabInfo)=><AntDesign name="wallet" size={24} color={tabInfo.focused ? "white":"black"} />
             }} />
-        <Drawer.Screen name="My Orders" component={Notifications} options={{
-                drawerIcon:(tabInfo)=><AntDesign name="barchart" size={24} color={tabInfo.focused ? "white":"black"} />
+        <Drawer.Screen name="My Drivers" component={MyDrivers} options={{
+                drawerIcon:(tabInfo)=><AntDesign name="addusergroup" size={24} color={tabInfo.focused ? "white":"black"} />
             }} />
-        <Drawer.Screen name="Help Center" component={Notifications} options={{
+        <Drawer.Screen name="Help Center" component={HelpCenter} options={{
                 drawerIcon:(tabInfo)=><Feather name="help-circle" size={24} color={tabInfo.focused ? "white":"black"} />
             }} />
         <Drawer.Screen name="Settings" component={Settings} options={{

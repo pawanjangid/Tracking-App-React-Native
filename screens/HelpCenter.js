@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState,useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,9 +6,9 @@ import {
   Image,
   TouchableHighlight
 } from 'react-native';
-import { AntDesign,MaterialIcons,FontAwesome5,Ionicons } from '@expo/vector-icons'
+import { AntDesign,MaterialIcons,Ionicons } from '@expo/vector-icons'
 import Constant from 'expo-constants';
-export default function Wallet({navigation})  {
+export default function HelpCenter({navigation})  {
     return (
       <View style={{marginTop:Constant.statusBarHeight,backgroundColor:"white",flex:1}}>
           <View style={styles.headerBar}>
@@ -16,40 +16,46 @@ export default function Wallet({navigation})  {
               <Ionicons name="arrow-back-sharp" size={24} color="black" onPress={()=>navigation.navigate("Home")} />
             </View>
             <View style={styles.headerName}>
-                <Text style={{fontSize:16,fontWeight:"bold"}}>Wallet</Text>
+                <Text style={{fontSize:16,fontWeight:"bold"}}>Help Center</Text>
             </View>
           </View>
           <View style={{padding:20}}>
+            <View style={{padding:10}}>
+                <Text>LAST ORDER</Text>
+            </View>
             <View style={styles.detailbox}>
-                <View>
-                  <Text style={{color:"white",fontSize:20}}>Balance : </Text>
+                <View style={{justifyContent:"center",alignItems:"center"}}>
+                    <AntDesign name="inbox" size={50} color="#636363" />
                 </View>
-                <View style={{padding:20,paddingLeft:0}}>
-                  <Text style={{color:"white",fontSize:30}}>$400 </Text>
-                </View>
-                <View style={{padding:15,paddingLeft:0}}>
-                  <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>navigation.navigate('Root',{screen:'TopupList'})}>
-                    <View style={{padding:10,flexDirection:"row",justifyContent:"center",backgroundColor:"white",borderRadius:10,width:150}}>
-                        <AntDesign name="plus" size={24} color="black" />
-                        <Text style={{width:"60%",padding:3,paddingLeft:0,fontSize:16,color:"black",alignItems:"center",fontSize:16,fontWeight:"bold"}}>Top up</Text>
-                    </View>
-                  </TouchableHighlight> 
+                <View style={{padding:14,paddingLeft:0,justifyContent:"center",alignItems:"center"}}>
+                  <Text style={{color:"#636363",fontSize:14,textAlign:"center"}}>
+                      You don't have any orders from the last 72 hours.
+                  </Text>
                 </View>
             </View>
             <View style={{padding:5}}>
-              <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>navigation.navigate('Root',{screen:'BalanceDetail'})}>
+              <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>navigation.navigate('Root',{screen:'FAQ'})}>
                 <View style={{padding:10,flexDirection:"row",justifyContent:"space-around"}}>
-                    <FontAwesome5 name="id-card" size={24} color="#000473" />
-                    <Text style={{width:"70%",padding:3,paddingLeft:0,fontSize:16}}>Balance Details</Text>
+                    <Ionicons name="help-circle-outline" size={24} color="#000473" />
+                    <Text style={{width:"70%",padding:3,paddingLeft:0,fontSize:16}}>FAQ</Text>
                     <MaterialIcons name="keyboard-arrow-right" size={24} color="black" />
                 </View>
               </TouchableHighlight>
             </View>
             <View style={{padding:5}}>
-            <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>navigation.navigate('Root',{screen:'Coupons'})}>
+            <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>navigation.navigate('Root',{screen:'Support'})}>
                 <View style={{padding:10,flexDirection:"row",justifyContent:"space-around"}}>
-                    <FontAwesome5 name="id-card" size={24} color="#000473" />
-                    <Text style={{width:"70%",padding:3,paddingLeft:0,fontSize:16}}>Coupons</Text>
+                    <Ionicons name="chatbubble-ellipses-outline" size={24} color="#000473" />
+                    <Text style={{width:"70%",padding:3,paddingLeft:0,fontSize:16}}>General Support</Text>
+                    <MaterialIcons name="keyboard-arrow-right" size={24} color="black" />
+                </View>
+              </TouchableHighlight>
+            </View>
+            <View style={{padding:5}}>
+            <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>navigation.navigate('Root',{screen:'Feedback'})}>
+                <View style={{padding:10,flexDirection:"row",justifyContent:"space-around"}}>
+                    <Ionicons name="chatbox-ellipses-outline" size={24} color="#000473" />
+                    <Text style={{width:"70%",padding:3,paddingLeft:0,fontSize:16}}>Send Feedback</Text>
                     <MaterialIcons name="keyboard-arrow-right" size={24} color="black" />
                 </View>
               </TouchableHighlight>
@@ -64,9 +70,10 @@ export default function Wallet({navigation})  {
 
 const styles = StyleSheet.create({
   detailbox:{
-    backgroundColor:"#000473",
+    backgroundColor:"#f2f2f2",
     padding:20,
-    borderRadius:10
+    borderRadius:10,
+    justifyContent:"center"
 
   },
   headerBar: {

@@ -1,16 +1,64 @@
-import React,{useState} from 'react';
-import {View,Text,StyleSheet,Image,ScrollView,Alert,TouchableHighlight} from 'react-native';
-import { AntDesign,MaterialIcons,Entypo,FontAwesome5 } from '@expo/vector-icons';
+import React,{useState,useEffect} from 'react';
+import {View,Text,StyleSheet,Image,ScrollView,Alert,TouchableHighlight,Modal,CheckBox} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AntDesign,MaterialIcons,Entypo,FontAwesome5,Feather } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 
 function Home({navigation}) {
 
-
+const [token,setToken] = useState(null);
 const [element,setElement] = useState([]);
-const [elementkey,setElementKey] = useState('1');
+var key = 'AddStop';
+const [elementkey,setElementKey] = useState(1);
+const [modalVisible, setModalVisible] = useState(false);
+const [isSelected, setSelection] = useState(true);
+
+const [pickText,setPickText] = useState('ASAP');
+
+const [orderParams,setOrderParams] = useState({
+  locations:[
+    {
+      latitude:0.0,
+      langitude:0.0,
+    },
+    {
+      latitude:0.0,
+      langitude:0.0,
+    },
+    {
+      latitude:0.0,
+      langitude:0.0,
+    },
+    {
+      latitude:0.0,
+      langitude:0.0,
+    }
+],
+asap:true,
+later:false
+})
+
+
+
+useEffect(() => {
+  AsyncStorage.getItem('LOGIN_TOKEN').then((value) => {
+    setToken(value)
+    if(value==null){
+      navigation.navigate('Root',{screen:'Login'})
+    }
+  })
+
+
+  
+})
+
+function selectVehicleClick(){
+    navigation.navigate('Root',{screen:'SelectVehicle',params:orderParams})
+}
+
 
 const StopLocation = () => (
-        <View key={elementkey} style={styles.dropContainer}>
+        <View style={styles.dropContainer}>
             <View>
               <MaterialIcons name="location-pin" size={20} color="black" />
             </View>
@@ -24,7 +72,7 @@ const StopLocation = () => (
 
 
   function addElement(){
-    element.push(<StopLocation />)
+    element.push(<StopLocation key={key+'_'+elementkey} />)
     setElement(element);
     setElementKey(elementkey+1)
   }
@@ -62,28 +110,95 @@ const StopLocation = () => (
         </View>
         <View style={styles.locationContainer}>
           <View style={styles.boxContainer}>
+          <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>{setModalVisible(!modalVisible)}}>
             <View style={styles.asapContainer}>
                 <View>
                   <Entypo name="stopwatch" size={16} color="#6e6e6e" />
                 </View>
                 <View style={{width:"90%",paddingLeft:15}}>
-                  <Text style={{fontWeight:"bold"}}>Pick up ASAP</Text>
+                  <Text style={{fontWeight:"bold"}}>Pick up {pickText}</Text>
                 </View>
                 <View>
                   <MaterialIcons name="keyboard-arrow-right" size={20} color="black" />
                 </View>
             </View>
-            <View style={styles.routerContainer}>
-                <View>
-                  <FontAwesome5 name="dot-circle" size={16} color="black" />
+          </TouchableHighlight>
+
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                Alert.alert("Driver Added Successfully");
+                setModalVisible(!modalVisible);
+                }}
+            >
+                <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                    <View >
+                        <Text style={{fontSize:18}}>
+                            Add a favorite get trucking driver
+                        </Text>
+                        <View style={{marginTop:30}}>
+                            <View style={styles.Inputcontainer}>
+                                    <View style={styles.iconContainer}>
+                                        <Feather name="clock" size={24} color="#878787" />
+                                    </View>
+                                    <View style={{width:"70%",justifyContent:"center"}}>
+                                      <Text style={{fontSize:16,fontWeight:"bold"}}>ASAP</Text>
+                                    </View>
+                                    <View style={styles.iconContainer}>
+                                    <CheckBox
+                                        value={isSelected}
+                                        onValueChange={()=>{setSelection(!isSelected);
+                                          !isSelected ? setPickText('ASAP') : setPickText('Later')
+                                          }}
+                                        style={styles.checkbox}
+                                        />
+                                    </View>
+                            </View>
+                        </View>
+                          <View style={{marginTop:30}}>
+                                <View style={styles.Inputcontainer}>
+                                        <View style={styles.iconContainer}>
+                                            <Feather name="smartphone" size={24} color="#878787" />
+                                        </View>
+                                        <View style={{width:"70%",justifyContent:"center"}}>
+                                          <Text>Later</Text>
+                                        </View>
+                                        <View style={styles.iconContainer}>
+                                          <CheckBox
+                                              value={!isSelected}
+                                              boxType="circle"
+                                              onValueChange={()=> {setSelection(!isSelected); !isSelected ? setPickText('ASAP') : setPickText('Later')}}
+                                              style={styles.checkbox}
+                                              />
+                                        </View>
+                              </View>
+                          </View>
+                          <View style={{justifyContent:"center",alignItems:"center"}}>
+                            <TouchableHighlight style={[styles.CloseContainer,{backgroundColor:"red"}]} onPress={() => setModalVisible(!modalVisible)}>
+                                <View>
+                                    <Text style={{fontWeight:"bold",color:"white"}}>Close</Text>
+                                </View>
+                            </TouchableHighlight> 
+                        </View>
+                    </View>
                 </View>
-                <View style={{width:"90%",paddingLeft:15}}>
-                  <Text style={{color:"#8a8a8a",fontWeight:"bold"}}>Pickup Location</Text>
                 </View>
-                <View>
-                    <MaterialIcons name="location-searching" size={20} color="black" onPress={()=>{Alert.alert("Fetching Your current location")}} />
-                </View>
-            </View>
+            </Modal>
+            
+              <View style={styles.routerContainer}>
+                  <View>
+                    <FontAwesome5 name="dot-circle" size={16} color="black" />
+                  </View>
+                  <View style={{width:"90%",paddingLeft:15}}>
+                    <Text style={{color:"#8a8a8a",fontWeight:"bold"}}>Pickup Location</Text>
+                  </View>
+                  <View>
+                      <MaterialIcons name="location-searching" size={20} color="black" onPress={()=>{Alert.alert("Fetching Your current location")}} />
+                  </View>
+              </View>
             <View style={styles.dropContainer}>
                 <View>
                   <MaterialIcons name="location-pin" size={20} color="black" />
@@ -107,9 +222,11 @@ const StopLocation = () => (
         </View>
       </ScrollView>
       <View style={styles.bottomContainer}>
-        <View style={styles.buttonStyle}>
-          <Text style={{color:"white",fontWeight:"bold"}}>Select Vehicle</Text>
-        </View>
+      <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>selectVehicleClick()}>
+          <View style={styles.buttonStyle}>
+            <Text style={{color:"white",fontWeight:"bold"}}>Select Vehicle</Text>
+          </View>
+        </TouchableHighlight>
       </View>
       
       </View>
@@ -196,7 +313,52 @@ const styles = StyleSheet.create({
     padding:10,
     paddingLeft:40,
     paddingRight:40,
-    backgroundColor:"rgba(62, 43, 227, 1)",
+    backgroundColor:"#000473",
     borderRadius:10
-  }
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: 'rgba(0,0,0,0.3)'
+  },
+  modalView: {
+    backgroundColor: "white",
+    borderTopLeftRadius:20,
+    borderTopRightRadius:20,
+    padding: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  Inputcontainer: {
+    padding:8,
+    margin:5,
+    flexDirection:'row',
+    justifyContent:'space-around',
+    backgroundColor:'#fff',
+    borderBottomWidth:0.5,
+    borderBottomColor:"#e8e8e8",
+    borderRadius:10,
+ },
+ checkbox: {
+  alignSelf: "center",
+},
+  iconContainer:{
+    justifyContent:"center"
+  },
+  CloseContainer:{
+    alignItems: "center",
+    marginTop:20,
+    backgroundColor:'#000473',
+    padding:15,
+    marginRight:30,
+    marginLeft:30,
+    borderRadius:30
+},
 })

@@ -1,118 +1,114 @@
-import  React from 'react';
-import { Ionicons,Feather,MaterialIcons,FontAwesome5,MaterialCommunityIcons,FontAwesome  } from '@expo/vector-icons';
-import {View,Text, TouchableOpacity,TextInput,ScrollView,Button,StyleSheet,SafeAreaView,FlatList,Modal,Pressable  } from 'react-native';
+import React, {useState,useEffect } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  BackHandler
+} from 'react-native';
+import { TabView, SceneMap,TabBar } from 'react-native-tab-view';
+import { Ionicons } from '@expo/vector-icons'
 import Constant from 'expo-constants';
 
-
-
-export default function Orders({navigation}) {
- return (
-      <View style={{backgroundColor:"#fff",marginTop:Constant.statusBarHeight}}>
-                <View style={{padding:15,
-                    flexDirection:'row',
-                    justifyContent:'space-around',
-                    borderBottomWidth:1,
-                    borderBottomColor:"#f5f5f5"
-                    }}>
-                    <View>
-                        <FontAwesome5 name="truck" size={26} color="#858585" />
-                    </View>
-                    <Text style={{width:"70%",
-                    backgroundColor:'#ffffff',
-                    padding:8,
-                    borderRadius:10,
-                    paddingLeft:10,
-                    fontSize:16,
-                    fontWeight:'bold'
-                    }} >Place Order</Text>
-                    <View>
-                        <MaterialIcons name="keyboard-arrow-right" size={26} color="#858585" onPress={() =>{navigation.navigate("Home")}} />
-                    </View>
-                </View>
-                <View style={{padding:15,
-                    flexDirection:'row',
-                    justifyContent:'space-around',
-                    borderBottomWidth:1,
-                    borderBottomColor:"#f5f5f5"
-                    }}>
-                    <View>
-                        <FontAwesome5 name="truck-moving" size={26} color="#858585" />
-                    </View>
-                    <Text style={{width:"70%",
-                    backgroundColor:'#ffffff',
-                    padding:8,
-                    borderRadius:10,
-                    paddingLeft:10,
-                    fontSize:16,
-                    fontWeight:'bold'
-                    }} >My Order</Text>
-                    <View>
-                    <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" onPress={() =>{navigation.navigate("MyOrders")}} />
-                    </View>
-                </View>
-                <View style={{padding:15,
-                    flexDirection:'row',
-                    justifyContent:'space-around',
-                    borderBottomWidth:1,
-                    borderBottomColor:"#f5f5f5"
-                    }}>
-                    <View>
-                        <MaterialCommunityIcons name="go-kart-track" size={30} color="#858585" />
-                    </View>
-                    <Text style={{width:"70%",
-                    backgroundColor:'#ffffff',
-                    padding:8,
-                    borderRadius:10,
-                    paddingLeft:10,
-                    fontSize:16,
-                    fontWeight:'bold'
-                    }} >Track Order</Text>
-                    <View>
-                    <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" onPress={() =>{navigation.navigate("TrackOrder")}} />
-                    </View>
-                </View>
-                <View style={{padding:15,
-                    flexDirection:'row',
-                    justifyContent:'space-around',
-                    borderBottomWidth:1,
-                    borderBottomColor:"#f5f5f5"
-                    }}>
-                    <View>
-                        <FontAwesome name="drivers-license" size={26} color="#858585" />
-                    </View>
-                    <Text style={{width:"70%",
-                    backgroundColor:'#ffffff',
-                    padding:8,
-                    borderRadius:10,
-                    paddingLeft:10,
-                    fontSize:16,
-                    fontWeight:'bold'
-                    }} >Manage Drivers</Text>
-                    <View>
-                     <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" onPress={() =>{navigation.navigate("ManageDriver")}} />
-                    </View>
-                </View>
-                <View style={{padding:15,
-                    flexDirection:'row',
-                    justifyContent:'space-around',
-                    borderBottomWidth:1,
-                    borderBottomColor:"#f5f5f5"
-                    }}>
-                    <View>
-                        <FontAwesome5 name="clipboard-check" size={26} color="#858585" />
-                    </View>
-                    <Text style={{width:"70%",
-                    backgroundColor:'#ffffff',
-                    padding:8,
-                    borderRadius:10,
-                    paddingLeft:10,
-                    fontSize:16,
-                    fontWeight:'bold'
-                    }} >Order History</Text>
-                    <View>
-                        <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" onPress={() =>{navigation.navigate("MyOrders")}} />
-                    </View>
-                </View>
+const FirstRoute = () => (
+    <View style={{ flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor: '#f7f7f7'}} >
+        <Image source={require("../assets/record.png")} style={{height:100,width:80,resizeMode:"stretch"}} />
+        <View style={{padding:20}}>
+          <Text>No transactions record found</Text>
         </View>
-    );
+    </View>
+  );
+  
+  const SecondRoute = () => (
+    <View style={{ flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor: '#f7f7f7'}}>
+        <Image source={require("../assets/record.png")} style={{height:100,width:80,resizeMode:"stretch"}} />
+        <View style={{padding:20}}>
+          <Text>No transactions record found</Text>
+        </View>
+    </View>
+  );
+
+  const ThirdRoute = () => (
+    <View style={{ flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor: '#f7f7f7'}}>
+        <Image source={require("../assets/record.png")} style={{height:100,width:80,resizeMode:"stretch"}} />
+        <View style={{padding:20}}>
+          <Text>No transactions record found</Text>
+        </View>
+    </View>
+  );
+  
+  const renderScene = SceneMap({
+    first: FirstRoute,
+    second: SecondRoute,
+    third: ThirdRoute,
+  });
+
+export default function Orders({navigation})  {
+
+    const [index, setIndex] = useState(0);
+    const [routes] = useState([
+        { key: 'first', title: 'Ongoing' },
+        { key: 'second', title: 'Completed'},
+        { key: 'third', title: 'Canceled' }
+    ]);
+
+
+    function handleBackButtonClick() {
+        navigation.navigate("Wallet");
+        return true;
+      }
+    
+      useEffect(() => {
+        BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+        return () => {
+          BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
+        };
+      }, []);
+
+    return (
+        <View style={{marginTop:Constant.statusBarHeight,backgroundColor:"white",flex:1}}>
+            <View style={styles.headerBar}>
+                <View style={styles.headerIcon}>
+                <Ionicons name="arrow-back-sharp" size={24} color="black" onPress={()=>navigation.navigate("Home")} />
+                </View>
+                <View style={styles.headerName}>
+                    <Text style={{fontSize:16,fontWeight:"bold"}}>Orders</Text>
+                </View>
+            </View>
+            <View style={styles.walletContainer}>
+            <TabView
+                    navigationState={{ index, routes }}
+                    renderScene={renderScene}
+                    renderTabBar={props => <TabBar {...props} indicatorStyle={{ backgroundColor: 'blue' }} style={{ backgroundColor: 'white'}} renderLabel={({ route, focused, color }) => (
+                        <Text style={{ color:focused ? "blue":"black", margin: 8,fontWeight:"bold" }}>
+                          {route.title}
+                        </Text>
+                      )} />}
+                    onIndexChange={setIndex}
+                    initialLayout={{ width: "100%"}}
+                    />
+            </View>
+        </View>
+    )
+}
+
+const styles = StyleSheet.create({
+  detailbox:{
+    backgroundColor:"#000473",
+    padding:20,
+    borderRadius:10
+  },
+  walletContainer:{
+    flex:1
+  },
+  headerBar: {
+    flexDirection:"row",
+    justifyContent:"space-around",
+    padding:5,
+    paddingTop:15
+  },
+  headerName:{
+    width:"80%",
+    justifyContent:"center"
   }
+});
