@@ -8,31 +8,18 @@ import {
   FlatList,
   Alert
 } from 'react-native';
-import { Foundation,MaterialIcons,FontAwesome5,Ionicons } from '@expo/vector-icons'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Foundation,Ionicons } from '@expo/vector-icons'
 import Constant from 'expo-constants';
 export default function TopupList({navigation})  {
-  const [amount,setAmount] = useState([
-    {
-      key:"1",
-      amount:4950,
-      description:"Get $290 off on your orders"
-    },
-    {
-      key:"2",
-      amount:990,
-      description:"Get $290 off on your orders"
-    },
-    {
-      key:"3",
-      amount:290,
-      description:"Get $290 off on your orders"
-    },
-    {
-      key:"4",
-      amount:100,
-      description:"Get $290 off on your orders"
-    }
-  ])
+  const [amount,setAmount] = useState([]);
+  const [message,setMessage] = useState();
+  const [selectedItem,setSelectedItem] = useState({
+    topup_id:0,
+    amount:0
+  });
+
+
 
   function handleBackButtonClick() {
     navigation.navigate("Wallet");
@@ -45,6 +32,48 @@ export default function TopupList({navigation})  {
       BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
     };
   }, []);
+
+
+
+  useEffect(() => {
+    AsyncStorage.getItem('LOGIN_TOKEN').then((value) => {
+      if(value!==null){
+        fetch('https://gettruckingbackend.herokuapp.com/users/topups', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'authorization':value
+            }
+        })
+            .then((response) => response.json())
+            .then((responseData) => {
+                    if(responseData.success === 1) {
+                        setAmount(responseData.data)
+                    }else{
+                        setMessage(responseData.data)
+                        AsyncStorage.removeItem('LOGIN_TOKEN');
+                        navigation.navigate('Root',{screen:"Login"})
+                    }
+                })
+            .catch((error) =>{
+                setMessage(error)
+            })
+      }
+    })
+
+  })
+
+
+  function CheckOut(){
+    if(selectedItem.amount >0){
+      navigation.navigate('Root',{screen:'Checkout',params:selectedItem})
+    }else{
+      Alert.alert("Please select atleast one item")
+    }
+  }
+
+
 
     return (
       <View style={{marginTop:Constant.statusBarHeight,backgroundColor:"white",flex:1}}>
@@ -61,25 +90,26 @@ export default function TopupList({navigation})  {
             data={amount}
             renderItem={({item})=>{
               return(
-                <View key={item.key} style={{padding:8,margin:8,borderRadius:10,backgroundColor:"#f5f5f5"}}>
-                  <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>Alert.alert("Go to Next tab")}>
+                <View key={item.topup_id.toString()} style={{padding:8,margin:8,borderRadius:10,backgroundColor: selectedItem.topup_id===item.topup_id ? '#edfceb' : "#f5f5f5"}}>
+                  <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>{setSelectedItem(item)}}>
                     <View style={{padding:10,justifyContent:"space-around"}}>
                         <Text style={{width:"70%",padding:3,paddingLeft:0,fontSize:25,fontWeight:"bold"}}>
                           s${item.amount}
                         </Text>
                         <Text style={{color:"#424fff"}}>
-                        <Foundation name="clipboard-pencil" size={15} color="#424fff" /> {item.description}
+                        <Foundation name="clipboard-pencil" size={15} color="#424fff" /> {item.offers}
                         </Text>
                     </View>
                     </TouchableHighlight>
                 </View>
               )}}
-          
+                
+              keyExtractor={item => item.topup_id.toString()}
           
            />
            </View>
            <View style={{position:"absolute",bottom:0,width:"100%",padding:10,paddingBottom:0,alignItems:"center"}}>
-              <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>{navigation.navigate('Root',{screen:'Checkout'})}}>
+              <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>{CheckOut()}}>
                   <View style={styles.buttonContainer} >
                       <Text style={styles.buttontitle}>
                           Add Topup

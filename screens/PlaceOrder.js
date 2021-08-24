@@ -58,6 +58,7 @@ export default function Wallet({navigation,route})  {
                                 setMessage('Order Placed Successfully')
                           }else{
                               setMessage(responseData.data)
+                              Alert.alert("Unable to save response");
                               //AsyncStorage.removeItem('LOGIN_TOKEN')
                           }
                       })

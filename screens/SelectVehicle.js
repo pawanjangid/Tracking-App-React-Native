@@ -19,6 +19,7 @@ export default function Wallet({navigation,route})  {
       }
     
       useEffect(() => {
+        
 
         fetch('https://gettruckingbackend.herokuapp.com/vehicle/')
         .then((response) => response.json())
@@ -33,12 +34,11 @@ export default function Wallet({navigation,route})  {
         
       }, []);
 
-    
-
     const [selectedItem,setSelectedItem] = useState();
 
 
     function onClickHandler(item){
+      console.log(route.params);
         setSelectedItem(item);
 
         navigation.navigate('Root',{screen:'AdditionalService',params:{...route.params,item}})

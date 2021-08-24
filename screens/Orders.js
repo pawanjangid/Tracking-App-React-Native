@@ -4,20 +4,51 @@ import {
   Text,
   View,
   Image,
-  BackHandler
+  BackHandler,
+  TouchableHighlight,
+  FlatList,
+  Alert
 } from 'react-native';
 import { TabView, SceneMap,TabBar } from 'react-native-tab-view';
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons,FontAwesome5 } from '@expo/vector-icons'
 import Constant from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const FirstRoute = () => (
-    <View style={{ flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor: '#f7f7f7'}} >
-        <Image source={require("../assets/record.png")} style={{height:100,width:80,resizeMode:"stretch"}} />
-        <View style={{padding:20}}>
-          <Text>No transactions record found</Text>
-        </View>
-    </View>
-  );
+export default function Orders({navigation})  {
+
+  const [orders,setOrder] = useState([]);
+  const [message,setMessage] = useState();
+  
+  useEffect(() => {
+    AsyncStorage.getItem('LOGIN_TOKEN').then((value) => {
+      if(value!==null){
+        fetch('https://gettruckingbackend.herokuapp.com/users/order', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'authorization':value
+            }
+        })
+            .then((response) => response.json())
+            .then((responseData) => {
+                    if(responseData.success === 1) {
+                        setOrder(responseData.data)
+                    }else{
+                        setMessage(responseData.data)
+                        AsyncStorage.removeItem('LOGIN_TOKEN');
+                        navigation.navigate('Root',{screen:"Login"})
+                    }
+                })
+            .catch((error) =>{
+                setMessage(error)
+            })
+      }
+    })
+
+  })
+
+
   
   const SecondRoute = () => (
     <View style={{ flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor: '#f7f7f7'}}>
@@ -38,12 +69,47 @@ const FirstRoute = () => (
   );
   
   const renderScene = SceneMap({
-    first: FirstRoute,
+    first: ()=>{
+      return(
+        <View style={{ flex: 1}} >
+          <FlatList
+              data={orders}
+              renderItem={({ item }) => <View style={{padding:20}}>
+                <View style={{backgroundColor:"#fafafa",borderRadius:10,elevation:5}}>
+                <View style={{padding:10}}>
+                  <Text style={{fontSize:20,fontWeight:"bold"}}>{item.vehicle_name}</Text>
+                </View>
+                <View style={{paddingLeft:10}}>
+                  <Text>{item.description}</Text>
+                </View>
+                <View style={{flexDirection:"row",justifyContent:"space-around",padding:10}}>
+                  <View style={{justifyContent:"center",padding:5}}>
+                    <Text style={{fontSize:16,fontWeight:"bold"}}>Amount : ${item.amount}</Text>
+                  </View>
+                  <View style={{flexDirection:"row",backgroundColor:"#000473",padding:5}}>
+                    <View style={{justifyContent:"center",padding:5}}>
+                      <FontAwesome5 name="route" size={18} color="white" />
+                    </View>
+                    <TouchableHighlight onPress={()=>{Alert.alert("Waiting Opening Map")}}>
+                      <View style={{justifyContent:"center",padding:5}}>
+                        <Text style={{fontWeight:"bold",color:"white"}}>Track Now</Text>
+                      </View>
+                    </TouchableHighlight>
+                    
+                    
+                  </View>
+                  
+                </View>
+                </View>
+              </View>}
+              keyExtractor={item => item.order_id.toString()}
+            />
+      </View>
+      )
+    },
     second: SecondRoute,
     third: ThirdRoute,
   });
-
-export default function Orders({navigation})  {
 
     const [index, setIndex] = useState(0);
     const [routes] = useState([

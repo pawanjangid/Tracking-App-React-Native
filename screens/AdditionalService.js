@@ -100,12 +100,13 @@ export default function Wallet({navigation,route})  {
             })
                 .then((response) => response.json())
                 .then((responseData) => {
+                    console.log(responseData);
                         if(responseData.success === 1) {
                             setAdditional(responseData.data)
                             console.log(responseData);
                         }else{
                             setMessage(responseData.data)
-                            //AsyncStorage.removeItem('LOGIN_TOKEN')
+                            AsyncStorage.removeItem('LOGIN_TOKEN')
                         }
                     })
                 .catch((error) =>{

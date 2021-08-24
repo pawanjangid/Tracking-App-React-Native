@@ -4,11 +4,28 @@ import {
   Text,
   View,
   Image,
-  TouchableHighlight
+  BackHandler
 } from 'react-native';
-import { AntDesign,MaterialIcons,FontAwesome5,Ionicons } from '@expo/vector-icons'
+import { MaterialIcons,FontAwesome5,Ionicons } from '@expo/vector-icons'
 import Constant from 'expo-constants';
-export default function Checkout({navigation})  {
+export default function Checkout({navigation,route})  {
+
+
+
+  function handleBackButtonClick() {
+    navigation.navigate("TopupList");
+    return true;
+  }
+
+  useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
+    };
+  }, []);
+
+
+
     return (
       <View style={{marginTop:Constant.statusBarHeight,backgroundColor:"white",flex:1}}>
           <View style={styles.headerBar}>
@@ -20,7 +37,7 @@ export default function Checkout({navigation})  {
             </View>
           </View>
           <View style={styles.amountContainer}>
-            <Text style={{fontSize:30,fontWeight:"bold"}}>S$290</Text>
+            <Text style={{fontSize:30,fontWeight:"bold"}}>S${route.params.amount}</Text>
           </View>
           <View style={{padding:20}}>
               <Text style={{color:"#cfcfcf"}}>

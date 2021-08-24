@@ -1,16 +1,28 @@
 import React,{useState,useEffect} from 'react';
-import {View,Text,StyleSheet,Image,ScrollView,Alert,TouchableHighlight,Modal,CheckBox} from 'react-native';
+import {View,Text,StyleSheet,Image,ScrollView,Alert,TouchableHighlight,Modal,CheckBox,TextInput} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AntDesign,MaterialIcons,Entypo,FontAwesome5,Feather } from '@expo/vector-icons';
+import { AntDesign,MaterialIcons,Entypo,FontAwesome5,Feather,Ionicons,EvilIcons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
+import * as Location from 'expo-location';
+import MapView, { Marker } from 'react-native-maps';
+
+
 
 function Home({navigation}) {
 
-const [token,setToken] = useState(null);
 const [element,setElement] = useState([]);
 var key = 'AddStop';
 const [elementkey,setElementKey] = useState(1);
 const [modalVisible, setModalVisible] = useState(false);
+const [locationType, setLocationType] = useState('');
+
+const [locationModal, setLocationModal] = useState(false);
+const [initialRegion,setInitialRegion] = useState();
+const [location, setLocation] = useState();
+const [locations, setLocations] = useState([]);
+const [errorMsg, setErrorMsg] = useState(null);
+const [addresses, setAddresses] = useState();
+
 const [isSelected, setSelection] = useState(true);
 
 const [pickText,setPickText] = useState('ASAP');
@@ -42,18 +54,50 @@ later:false
 
 useEffect(() => {
   AsyncStorage.getItem('LOGIN_TOKEN').then((value) => {
-    setToken(value)
     if(value==null){
       navigation.navigate('Root',{screen:'Login'})
     }
   })
-
-
-  
 })
 
+
+function checkType(column) {
+  return !(column.type==locationType)
+}
+
+function updateLocation(){
+  let filteredLocation = locations.filter(checkType);
+  setLocations([{location:location,type:locationType,title:addresses},...filteredLocation]);
+  Alert.alert("PickUp location added successfully");
+}
+
+
+useEffect(() => {
+  (async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      setErrorMsg('Permission to access location was denied');
+      return;
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+    setInitialRegion({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      latitudeDelta: 0.05,
+      longitudeDelta: 0.05,
+    })
+  })();
+}, []);
+
+
+
+
+
+
 function selectVehicleClick(){
-    navigation.navigate('Root',{screen:'SelectVehicle',params:orderParams})
+
+    navigation.navigate('Root',{screen:'SelectVehicle',params:{locations,asap:pickText}})
 }
 
 
@@ -84,11 +128,27 @@ const StopLocation = () => (
   }
 
 
+  function chooseLocation(type){
+    setLocationType(type);
+    setLocationModal(!locationModal)
+  }
+
+
+
+  const homePlace = {
+    description: 'Home',
+    geometry: { location: { lat: 48.8152937, lng: 2.4597668 } },
+  };
+  const workPlace = {
+    description: 'Work',
+    geometry: { location: { lat: 48.8496818, lng: 2.2940881 } },
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.headerBar}>
         <View style={styles.headerIcon}>
-          <AntDesign name="menu-fold" size={24} color="black" onPress={() =>{navigation.openDrawer()}}/>
+          <AntDesign name="menu-fold" size={24} color="black" onPress={() =>{setLocationModal(!locationModal)}}/>
         </View>
         <View style={styles.headerName}>
             <Text style={{fontSize:16,fontWeight:"bold"}}>Get Trucking</Text>
@@ -108,9 +168,65 @@ const StopLocation = () => (
               <Image source={require("../assets/homeBackground.png")} style={{ height:100,width:200,resizeMode:"contain"}} />
           </View>
         </View>
+
+        {/* Location Fetecher Modal */}
+
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={locationModal}
+            onRequestClose={() => {
+              Alert.alert("Location not saved");
+              setLocationModal(!locationModal);
+            }}
+          >
+            <View style={styles.locationModalContainer}>
+              <View style={styles.headerBar}>
+                <View style={styles.headerIcon}>
+                  <Ionicons name="arrow-back" size={24} color="black" onPress={() =>{setLocationModal(!locationModal)}} />
+                </View>
+                <View style={{width:"80%",paddingLeft:30,justifyContent:"center"}}>
+                    <Text style={{fontSize:16,fontWeight:"bold"}}>Get Trucking</Text>
+                </View>
+              </View>
+              
+              
+              
+
+
+              <View style={styles.locationModalView}>
+              <MapView
+                style={{width:"100%",height:"100%"}}
+                initialRegion={initialRegion}
+                showsUserLocation={true}
+                onRegionChange={(e)=>{setLocation(e)}}
+              >
+                
+              </MapView>
+              <View style={{position: "absolute",height:"100%",width:"100%",justifyContent:"center",alignItems:"center"}}>
+                  <EvilIcons name="location" size={50} color="#000473" />
+              </View>
+              </View>
+              <View>
+                  <View style={styles.Inputcontainer}>
+                      <TextInput style={styles.textinput}
+                      placeholder="Enter Full Address"
+                      placeholderTextColor="#878787"
+                      value={addresses}
+                      onChangeText={(e)=>{setAddresses(e)}}
+                      />
+                    </View>
+              </View>
+              <TouchableHighlight style={styles.locationbuttonStyle} onPress={()=>{updateLocation()}} >
+                <Text style={{color: "white",fontSize:16,fontWeight:"bold"}}>Save</Text>  
+              </TouchableHighlight>
+            </View>
+          </Modal>
+      {/* end Location Fetecher Modal */}
+
         <View style={styles.locationContainer}>
           <View style={styles.boxContainer}>
-          <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>{setModalVisible(!modalVisible)}}>
+          <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>{setModalVisible(!modalVisible);}}>
             <View style={styles.asapContainer}>
                 <View>
                   <Entypo name="stopwatch" size={16} color="#6e6e6e" />
@@ -188,6 +304,7 @@ const StopLocation = () => (
                 </View>
             </Modal>
             
+            <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={() => chooseLocation('PickUp')}>                     
               <View style={styles.routerContainer}>
                   <View>
                     <FontAwesome5 name="dot-circle" size={16} color="black" />
@@ -199,6 +316,8 @@ const StopLocation = () => (
                       <MaterialIcons name="location-searching" size={20} color="black" onPress={()=>{Alert.alert("Fetching Your current location")}} />
                   </View>
               </View>
+            </TouchableHighlight> 
+            <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={() => chooseLocation('Drop')}>     
             <View style={styles.dropContainer}>
                 <View>
                   <MaterialIcons name="location-pin" size={20} color="black" />
@@ -207,6 +326,7 @@ const StopLocation = () => (
                   <Text style={{color:"#8a8a8a",fontWeight:"bold"}}>Where to...</Text>
                 </View>
             </View>
+            </TouchableHighlight>
             {/* Append Element Here */}
             <View>
               {element}
@@ -316,6 +436,15 @@ const styles = StyleSheet.create({
     backgroundColor:"#000473",
     borderRadius:10
   },
+  locationbuttonStyle:{
+    padding:15,
+    paddingLeft:40,
+    paddingRight:40,
+    backgroundColor:"#000473",
+    justifyContent:"center",
+    alignItems:"center",
+    borderRadius:10
+  },
   centeredView: {
     flex: 1,
     justifyContent: "flex-end",
@@ -360,5 +489,23 @@ const styles = StyleSheet.create({
     marginRight:30,
     marginLeft:30,
     borderRadius:30
+},
+locationModalContainer:{
+    flex: 1,
+    backgroundColor: '#fff'
+},
+locationModalView:{
+  flex: 1,
+  paddingTop:10
+},
+Inputcontainer: {
+  padding:8,
+  margin:10,
+  flexDirection:'row',
+  justifyContent:'space-around',
+  borderWidth:1,
+  borderColor:"#bdbdbd",
+  backgroundColor:'#fff',
+  borderRadius:10
 },
 })
