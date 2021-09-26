@@ -6,47 +6,40 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 function Country({navigation}) {
 
     const [countries,setCountries] = useState([]);
-
-    const [country,setCountry] = useState('')
-    const [token,setToken] = useState();
     useEffect(() => {
-
-
-        fetch('https://gettruckingbackend.herokuapp.com/users/countries')
+    fetch('https://gettruckingbackend.herokuapp.com/users/countries')
       .then((response) => response.json())
       .then((json) => {setCountries(json.data)})
       .catch((error) => console.error(error));
-
-
     }, []);
 
-        useEffect(() => {
+    useEffect(() => {
         AsyncStorage.getItem('LOGIN_TOKEN').then((value) => {
-            setToken(value)
+            if(value!==null){
+                navigation.navigate('Home')
+            }
         })
-        if(token!==null){
-            navigation.navigate('Home')
-        }
-        },[])
+    },[])
 
       const renderItem = ({ item }) => {
         return (
             <TouchableOpacity onPress={()=>{navigation.navigate("GetStart")}}>
                 <View style={styles.ItemContainer}>
-                    <View style={{width:"80%"}}>
+                <View style={{width:30}}>
+                        <Text>{item.phonecode}</Text>
+                    </View>
+                    <View style={{width:"75%"}}>
                         <Text>{item.name}</Text>
                     </View>
                     <View style={{flex:1}}>
                         <MaterialIcons name="keyboard-arrow-right" size={24} color="black" />
                     </View>
-                        
                 </View>
-                
             </TouchableOpacity>
           );
     }
     return (
-        <View style={styles.Container}> 
+        <View style={styles.Container}>
             <View style={styles.ImageContainer}>
                 <Image source={require("../assets/country.png")} style={{resizeMode:"contain",width:300,height:200}} />
             </View>

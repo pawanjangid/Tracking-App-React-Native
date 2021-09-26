@@ -18,6 +18,7 @@ export default function Orders({navigation})  {
 
   const [orders,setOrder] = useState([]);
   const [message,setMessage] = useState();
+  const [driveNote,setDriverNote] = useState('No any Note');
   
   useEffect(() => {
     AsyncStorage.getItem('LOGIN_TOKEN').then((value) => {
@@ -46,7 +47,7 @@ export default function Orders({navigation})  {
       }
     })
 
-  })
+  },[])
 
 
   
@@ -90,7 +91,7 @@ export default function Orders({navigation})  {
                     <View style={{justifyContent:"center",padding:5}}>
                       <FontAwesome5 name="route" size={18} color="white" />
                     </View>
-                    <TouchableHighlight onPress={()=>{Alert.alert("Waiting Opening Map")}}>
+                    <TouchableHighlight onPress={()=>{navigation.navigate('Root',{screen:"Tracking",params:item})}}>
                       <View style={{justifyContent:"center",padding:5}}>
                         <Text style={{fontWeight:"bold",color:"white"}}>Track Now</Text>
                       </View>

@@ -6,35 +6,86 @@ import {
   BackHandler,
   Switch,
   TouchableHighlight,
-  Alert
+  Alert,
+  Pressable,
+  Modal,
+  TextInput,
+  FlatList
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons ,FontAwesome5,MaterialIcons,MaterialCommunityIcons} from '@expo/vector-icons'
 import Constant from 'expo-constants';
 export default function Wallet({navigation,route})  {
     const [isEnabled, setIsEnabled] = useState(false);
-    const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+    const toggleSwitch = () => {
+        if(!isEnabled===false) {
+            setPreferedName('');
+            setPreferedDriver(0);
+        }else{
+            setDriverModal(!driverModal)
+        }
+        setIsEnabled(previousState => !previousState)
+    }
     function handleBackButtonClick() {
         navigation.goBack();
         return true;
       }
-    
-      useEffect(() => {
 
+    const [driveNote,setDriverNote] = useState('No any Note');
+    const [noteModal,setNoteModal] = useState(false);
+    const [drivers,setDrivers] = useState([]);
+    const [preferedDriver,setPreferedDriver] = useState(0);
+    const [pereferedName,setPreferedName] = useState();
+      const [pickup,setPickUp] = useState();
+      useEffect(() => {
+        var pickup = route.params.selectedItem.finaldata.filter(item=>item.type === 'PickUp');
+        setPickUp(pickup[0]);
         BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
         return () => {
           BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
         };
       }, []);
 
+
+      useEffect(() => {
+        AsyncStorage.getItem('LOGIN_TOKEN').then((value) => {
+          if(value!==null){
+            fetch('https://gettruckingbackend.herokuapp.com/users/favoriteDriver', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'authorization':value
+                }
+            })
+                .then((response) => response.json())
+                .then((responseData) => {
+                        if(responseData.success === 1) {
+                              setDrivers(responseData.data);
+                        }else{
+                            setMessage(responseData.message)
+                            console.log(responseData);
+                        }
+                    })
+                .catch((error) =>{
+                    setMessage(error)
+                })
+          }
+        })
+      },[])
+
     const [vehicle_id,setVehicleId] = useState(route.params.selectedItem.item.vehicle_id);
     const [asap,setASAP] = useState(route.params.selectedItem.asap);
-    const [locations,setLocations] = useState(route.params.selectedItem.locations);
+    const [locations,setLocations] = useState(route.params.selectedItem.finaldata);
     const [message,setMessage]=useState();
+    const [driverModal,setDriverModal] = useState(false);
+    const [coupon,setCoupon] = useState();
+    const [couponModal,setCouponModal] = useState(false);
+
+
     function onsubmitHandler(){
         AsyncStorage.getItem('LOGIN_TOKEN').then((value) => {
             if(value!==null){
-              //console.log(route.params.item);
               fetch('https://gettruckingbackend.herokuapp.com/users/order', {
                   method: 'POST',
                   headers: {
@@ -46,20 +97,56 @@ export default function Wallet({navigation,route})  {
                       vehicle_id:vehicle_id,
                       asap:asap,
                       locations: JSON.stringify(locations),
-                      amount:200,
-                      preferred_driver:1
+                      amount:route.params.amount,
+                      duration:route.params.duration,
+                      distance:route.params.distance,
+                      pickLatitude:pickup.latitude,
+                      pickLongitude:pickup.longitude,
+                      preferred_driver:preferedDriver
                   })
               })
                   .then((response) => response.json())
                   .then((responseData) => {
                           if(responseData.success === 1) {
-                                Alert.alert("Order Placed Successfully")
-                                navigation.navigate("Home");
+                                Alert.alert("Order Placed Successfully");
+                                console.log(responseData);
+                                navigation.navigate('Root',{screen:"Tracking",params:responseData.data[0]})
                                 setMessage('Order Placed Successfully')
                           }else{
                               setMessage(responseData.data)
                               Alert.alert("Unable to save response");
                               //AsyncStorage.removeItem('LOGIN_TOKEN')
+                          }
+                      })
+                  .catch((error) =>{
+                      setMessage(error)
+                  })
+            }
+          })
+    }
+
+    function applyCoupon(){
+        AsyncStorage.getItem('LOGIN_TOKEN').then((value) => {
+            if(value!==null){
+              fetch('https://gettruckingbackend.herokuapp.com/users/applyCoupon', {
+                  method: 'POST',
+                  headers: {
+                      'Accept': 'application/json',
+                      'Content-Type': 'application/json',
+                      'authorization':value
+                  },
+                  body: JSON.stringify({
+                      coupon:coupon
+                  })
+              })
+                  .then((response) => response.json())
+                  .then((responseData) => {
+                          if(responseData.success === 1) {
+                                console.log(responseData);
+                          }else{
+                                console.log(responseData);
+                              setMessage(responseData.data)
+                              Alert.alert("Unable to save response");
                           }
                       })
                   .catch((error) =>{
@@ -79,13 +166,82 @@ export default function Wallet({navigation,route})  {
                 <Text style={{fontSize:16,fontWeight:"bold"}}>Place Order</Text>
             </View>
           </View>
+
+          <Modal
+                animationType="slide"
+                transparent={true}
+                visible={driverModal}
+                onRequestClose={() => {
+                Alert.alert("Modal has been closed.");
+                setDriverModal(!driverModal);
+                }}
+            >
+                <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                    <FlatList
+                      data={drivers}
+                      renderItem={({item})=>{
+                        return(
+                          <View style={{paddingLeft:10,paddingRight:10,paddingBottom:10}}>
+                            <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>{setPreferedDriver(item.driver_id);setPreferedName(item.fullName);setDriverModal(!driverModal)}}>
+                            <View style={{justifyContent:"space-around",padding:20,flexDirection:"row",backgroundColor:"#e0e0e0",borderRadius:10,elevation:2}}>
+                              <View style={{justifyContent:"center"}}>
+                                <Text style={{fontSize:16,fontWeight:"bold"}}>{item.fullName}</Text>
+                              </View>
+                              <View style={{justifyContent:"center"}}>
+                                <Text style={{fontSize:16,fontWeight:"bold"}}>{item.phone}</Text>
+                              </View>
+                            </View>
+                            </TouchableHighlight>
+                          </View>
+                        )
+                      }}
+                      keyExtractor={(item) => item.favdriver_id.toString()}
+                    />
+                </View>
+                </View>
+            </Modal>
+
+
+
             <View style={{padding:20,marginTop:40,flex:1}}>
-                
+                        <Modal
+                        animationType="slide"
+                        transparent={true}
+                        visible={noteModal}
+                        onRequestClose={() => {
+                            Alert.alert("Modal has been closed.");
+                            setNoteModal(!noteModal);
+                        }}
+                        >
+                        <View style={styles.centeredView}>
+                            <View style={styles.modalView}>
+                                <View style={styles.Inputcontainer}>
+                                    <TextInput
+                                        style={styles.textinput}
+                                        multiline={true}
+                                        numberOfLines={4}
+                                        onChangeText={(text) =>setDriverNote(text)}
+                                        value={driveNote}/>
+                                </View>
+                                <View style={{alignItems:"center"}}>
+                                    <Pressable style={styles.buttonStyle} onPress={()=>{setNoteModal(!noteModal)}}>
+                                        <Text style={styles.textStyle}>Done</Text>
+                                    </Pressable>
+                                </View>
+                                
+                            </View>
+                        </View>
+                        </Modal>
                 <View style={{padding:5}}>
-                <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>{console.log('hello')}}>
+                <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>{setNoteModal(!noteModal)}}>
                     <View style={{padding:10,flexDirection:"row",justifyContent:"space-around"}}>
                         <MaterialIcons name="chat" size={24} color="#000473" />
-                        <Text style={{width:"70%",padding:3,paddingLeft:0,fontSize:16}}>Add notes to your driver</Text>
+                        <View style={{width:"70%"}}>
+                            <Text style={{padding:3,paddingLeft:0,fontSize:16}}>Add notes to your driver</Text>
+                            <Text numberOfLines={1} style={{fontSize:12}}>{driveNote}</Text>
+                        </View>
+                        
                         <MaterialIcons name="keyboard-arrow-right" size={24} color="black" />
                     </View>
                 </TouchableHighlight>
@@ -120,6 +276,9 @@ export default function Wallet({navigation,route})  {
                             fontSize:16,
                             fontWeight:'bold',
                             }} >Favourite drivers first</Text>
+                        <Text>
+                            {pereferedName}
+                        </Text>
                             
                     </View>
                     <View style={{justifyContent:'center'}}>
@@ -127,7 +286,7 @@ export default function Wallet({navigation,route})  {
                                 trackColor={{ false: "#767577", true: "#81b0ff" }}
                                 thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
                                 ios_backgroundColor="#3e3e3e"
-                                onValueChange={toggleSwitch}
+                                onValueChange={()=>{toggleSwitch();}}
                                 value={isEnabled}
                             />
                     </View>
@@ -144,12 +303,44 @@ export default function Wallet({navigation,route})  {
                         </View>
                     </TouchableHighlight>
                 </View>
+
+                <Modal
+                        animationType="slide"
+                        transparent={true}
+                        visible={couponModal}
+                        onRequestClose={() => {
+                            Alert.alert("Modal has been closed.");
+                            setCouponModal(!couponModal);
+                        }}
+                        >
+                        <View style={styles.centeredView}>
+                            <View style={styles.modalView}>
+                                <View style={styles.Inputcontainer}>
+                                <TextInput style={styles.textinput}
+                                        placeholder="Coupon"
+                                        placeholderTextColor="#878787"
+                                        value={coupon}
+                                        onChangeText={(e)=>{setCoupon(e)}}
+                                        />
+                                </View>
+                                <View style={{alignItems:"center"}}>
+                                    <Pressable style={styles.buttonStyle} onPress={()=>{applyCoupon();setCouponModal(!couponModal)}}>
+                                        <Text style={styles.textStyle}>Done</Text>
+                                    </Pressable>
+                                </View>
+                                
+                            </View>
+                        </View>
+                        </Modal>
+
+
+
                 <View style={{padding:5}}>
-                    <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>navigation.navigate('Root',{screen:'Coupons'})}>
+                    <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>{setCouponModal(!couponModal)}}>
                         <View style={{padding:10,flexDirection:"row",justifyContent:"space-around"}}>
                             <MaterialCommunityIcons name="file-plus-outline" size={24} color="#000473" />
                             <View style={{width:"70%"}}>
-                                <Text style={{padding:3,paddingLeft:0,fontSize:16}}>Add coupon</Text>
+                                <Text style={{padding:3,paddingLeft:0,fontSize:16}}>{coupon ? coupon : 'Add coupon'}</Text>
                             </View>
                             
                             <MaterialIcons name="keyboard-arrow-right" size={24} color="black" />
@@ -157,6 +348,10 @@ export default function Wallet({navigation,route})  {
                     </TouchableHighlight>
                 </View>
             </View>
+            <View style={{justifyContent:"space-around",padding:10,alignItems:"center",flexDirection:"row"}}>
+                <Text style={{fontSize:16,fontWeight:"bold"}}>Total Amount:</Text>
+                    <Text style={{fontSize:20,fontWeight:"bold"}}>S${route.params.amount}</Text>
+                </View>
             <View style={{justifyContent:"center",padding:30}}>
                     <TouchableHighlight style={styles.buttonStyle} underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>{onsubmitHandler()}}>
                         <Text style={{fontWeight:"bold",fontSize:16,color:'white'}}>Place Order</Text>
@@ -184,5 +379,46 @@ const styles = StyleSheet.create({
         justifyContent:"center",
         alignItems:"center"
       },
+      centeredView: {
+        flex: 1,
+        justifyContent: "flex-end",
+        backgroundColor:"rgba(0,0,0,0.5)"
+      },
+      modalView: {
+        backgroundColor: "white",
+        borderRadius: 20,
+        borderBottomRightRadius:0,
+        borderBottomLeftRadius:0,
+        padding: 35,
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+      },
+      Inputcontainer: {
+        padding:8,
+        margin:10,
+        flexDirection:'row',
+        justifyContent:'space-around',
+        borderWidth:1,
+        borderColor:"#bdbdbd",
+        backgroundColor:'#fff',
+        borderRadius:10
+     },
+      textinput:{
+        backgroundColor:'#fff',
+        padding:3,
+        borderRadius:10,
+        paddingLeft:10,
+        fontSize:14,
+        fontWeight:'bold'
+    },
+    textStyle:{
+        color:'#fff'
+    }
 
 });

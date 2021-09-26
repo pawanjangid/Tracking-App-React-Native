@@ -6,13 +6,11 @@ import {
   Image,
   BackHandler,
   Switch,
-  CheckBox,
-  ScrollView,
   TouchableHighlight,
   FlatList
 } from 'react-native';
 
-
+import CheckBox from '../components/CheckBox';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons ,Feather} from '@expo/vector-icons'
 import Constant from 'expo-constants';
@@ -24,28 +22,42 @@ export default function Wallet({navigation,route})  {
         return true;
       }
     
-      useEffect(() => {
+
+
+    const [selectedItem,setSelectedItem] = useState(route.params);
+    const [additional,setAdditional] = useState([]);
+    const [message,setMessage] = useState();
+    const [amount,setAmount] = useState(0);
+    
+    const [checkedState, setCheckedState] = useState([]);
+
+    const handleOnChange = (position,data) => {
+        checkedState[position] = !checkedState[position];
+        if(checkedState[position]){
+            setAmount(amount+parseInt(data.amount));
+        }else{
+            setAmount(amount-parseInt(data.amount));
+            console.log("removed")
+        }
+        console.log(checkedState);
+        setCheckedState(checkedState);
+    }
+
+    function onsubmitHandler(){
+        navigation.navigate('Root',{screen:'PlaceOrder',params:{...route.params,selectedItem,amount:amount}})
+    }
+
+    
+    useEffect(() => {
+        let amt = parseInt(route.params.item.baseprice)+parseInt(route.params.item.parKmcost)*parseInt(route.params.distance.replace(/,/g, ''));
+        setAmount(amt);
         BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
         return () => {
           BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
         };
       }, []);
 
-    const [selectedItem,setSelectedItem] = useState(route.params);
-    const [cod,setCOD] = useState(false);
-    const [roundTrip,setRoundTrip] = useState(false);
-    const [deepfreeze,setDeepFreeze] = useState(false);
-    const [additional,setAdditional] = useState([]);
-    const [message,setMessage] = useState();
-
-
-
-    function onsubmitHandler(){
-        //console.log({...route.params,selectedItem})
-        navigation.navigate('Root',{screen:'PlaceOrder',params:{...route.params,selectedItem}})
-    }
-
-    const renderItem = ({ item }) => {
+    const renderItem = ({ item,index }) => {
         return (
             <View style={{padding:15,
                 flexDirection:'row',
@@ -72,16 +84,11 @@ export default function Wallet({navigation,route})  {
                         }} >S${item.amount}</Text>
                 </View>
                 <View style={{justifyContent:"center"}}>
-                    <CheckBox
-                        value={cod}
-                        onValueChange={setCOD}
-                        style={styles.checkbox}
-                        />
+                        <CheckBox  onChange={()=>handleOnChange(index,item)} />
                 </View>
             </View>
           );
         }
-
 
     useEffect(() => {
         AsyncStorage.getItem('LOGIN_TOKEN').then((value) => {
@@ -103,7 +110,8 @@ export default function Wallet({navigation,route})  {
                     console.log(responseData);
                         if(responseData.success === 1) {
                             setAdditional(responseData.data)
-                            console.log(responseData);
+                            var arr = new Array(responseData.data.length).fill(false);
+                            setCheckedState(arr);
                         }else{
                             setMessage(responseData.data)
                             AsyncStorage.removeItem('LOGIN_TOKEN')
@@ -114,7 +122,7 @@ export default function Wallet({navigation,route})  {
                 })
           }
         })
-      },[])
+      },[]);
 
 
 
@@ -155,7 +163,12 @@ export default function Wallet({navigation,route})  {
                                     {route.params.item.dimension}
                                 </Text>
                             </View>
-                        </View>
+                                <View style={[styles.vehicleDiomensinContainer,{flexDirection:"row",justifyContent:"space-around",padding:10}]}>
+                                    <Text style={[styles.vehicleDimension,{fontWeight:"bold",color:"green"}]}>
+                                        Travel Distance : {route.params.distance}
+                                    </Text>
+                                </View>
+                            </View>
                     </View>
                 </View>
                 <View style={styles.serviceContainer}>
@@ -232,7 +245,7 @@ export default function Wallet({navigation,route})  {
                     </View>
                 </View>
                 <View style={styles.additionalContainer}>
-                    <View style={{height:250}}>
+                    <View style={{height:200}}>
                         <View style={{padding:10, paddingLeft:20}}>
                             <Text style={{color:"#000473",fontWeight:"bold"}}>Additional Services</Text>
                         </View>
@@ -242,6 +255,10 @@ export default function Wallet({navigation,route})  {
                             keyExtractor={item => item.aservice_id.toString()}
                             />
                     </View>
+                </View>
+                <View style={{justifyContent:"space-around",padding:10,alignItems:"center",flexDirection:"row"}}>
+                <Text style={{fontSize:16,fontWeight:"bold"}}>Total Amount:</Text>
+                    <Text style={{fontSize:20,fontWeight:"bold"}}>S${amount}</Text>
                 </View>
                 <View style={{justifyContent:"center",padding:10}}>
                     <TouchableHighlight style={styles.buttonStyle} underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>{onsubmitHandler()}}>
@@ -267,6 +284,8 @@ const styles = StyleSheet.create({
   vehicleContainer:{
       flexDirection:"row",
       padding:15,
+      paddingTop:5,
+      paddingBottom:0,
       backgroundColor:"#ffffff",
       elevation:3,
       borderWidth:1,
@@ -276,6 +295,7 @@ const styles = StyleSheet.create({
   },
   vehicleImage:{
       width:"20%",
+      justifyContent:"center"
   },
   vehicleDetail:{
     width:"80%",
@@ -311,4 +331,11 @@ const styles = StyleSheet.create({
     justifyContent:"center",
     alignItems:"center"
   },
+  vehicleDimensionContainer:{
+    padding:3,
+    paddingLeft:7
+  },
+  vehicleDimension:{
+
+  }
 });

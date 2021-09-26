@@ -4,7 +4,9 @@ import {
   Text,
   View,
   Image,
-  BackHandler
+  BackHandler,
+  TouchableHighlight,
+  Alert
 } from 'react-native';
 import { MaterialIcons,FontAwesome5,Ionicons } from '@expo/vector-icons'
 import Constant from 'expo-constants';
@@ -25,7 +27,9 @@ export default function Checkout({navigation,route})  {
   }, []);
 
 
-
+function onSubmithandler() {
+  Alert.alert("Amount Added successfully");
+}
     return (
       <View style={{marginTop:Constant.statusBarHeight,backgroundColor:"white",flex:1}}>
           <View style={styles.headerBar}>
@@ -44,12 +48,20 @@ export default function Checkout({navigation,route})  {
                   ONLINE PAYMENT
               </Text>
             <View style={{padding:5,marginTop:10,paddingLeft:0,paddingRight:0,backgroundColor:"#f0f0f0"}}>
+
                 <View style={{padding:10,flexDirection:"row",justifyContent:"space-around"}}>
                     <FontAwesome5 name="id-card" size={24} color="#000473" />
                     <Text style={{width:"70%",padding:3,paddingLeft:0,fontSize:16}}>Credit Card</Text>
                     <MaterialIcons name="keyboard-arrow-right" size={24} color="blue" />
                 </View>
             </View>
+           </View>
+           <View style={{padding:10,justifyContent:"center",alignItems:"center",marginTop:10}}>
+             <TouchableHighlight style={styles.buttonContainer} underlayColor='rgba(73,182,77)' onPress={()=>{onSubmithandler()}}>
+                <View>
+                  <Text style={{color:"white",fontSize:16,fontWeight:"bold"}}>Submit</Text>
+                </View>
+             </TouchableHighlight>
            </View>
            <View style={{position:"absolute",bottom:0,width:"100%",padding:10,paddingBottom:0}}>
              <Image source={require("../assets/banner.png")} style={{height:120,width:"100%",resizeMode:"stretch"}} />
@@ -115,6 +127,6 @@ amountContainer:{
     marginBottom:20,
     width:250,
     borderRadius:30,
-    backgroundColor: "#7558FF",
+    backgroundColor: "#000473",
   },
 });

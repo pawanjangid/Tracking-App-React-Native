@@ -112,7 +112,7 @@ export default function EditProfile({navigation}) {
                             justifyContent:'space-around'
                             }}>
                         <Button title ="Save" color="#002a54" onPress={() => PressHandler()}></Button>
-                        <Button title ="Cancel" color="red" onPress={() => {navigation.goBack()}}></Button>
+                        <Button title ="Cancel" color="red" onPress={() => {navigation.navigate('Settings')}}></Button>
                     </View>
                 </View>
             </View>

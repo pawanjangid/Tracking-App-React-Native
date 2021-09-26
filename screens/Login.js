@@ -17,40 +17,47 @@ export default function Login({navigation}) {
     const [eye,setEye] = useState(false);
     const [message,setMessage] = useState();
     const [token,setToken] = useState(null);
-    const PressHandler = async () => {
-        
-        try {
 
-            fetch('https://gettruckingbackend.herokuapp.com/users/login', {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    phone: phone,
-                    password: password
-                })
-            })
-                .then((response) => response.json())
-                .then((responseData) => {
-                        if(responseData.success === 1) {
-                           setToken(responseData.token);
-                            console.log("done")
-                        }else{
-                            setMessage(responseData.data)
-                        }
+    const PressHandler = async () => {
+        if(termCheck && policyCheck){
+            if(phone.length===10){
+                try {
+                    fetch('https://gettruckingbackend.herokuapp.com/users/login', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            phone: phone,
+                            password: password
+                        })
                     })
-                .catch((error) =>{
-                    setMessage(error)
-                })
+                        .then((response) => response.json())
+                        .then((responseData) => {
+                                if(responseData.success === 1) {
+                                   setToken(responseData.token);
+                                }else{
+                                    setMessage(responseData.data)
+                                }
+                            })
+                        .catch((error) =>{
+                            setMessage(error)
+                        })
+                }
+                catch (err) {
+                    console.error(err);
+                }
+                if(token!==null){
+                    await AsyncStorage.setItem('LOGIN_TOKEN',token);
+                }
+            }else{
+                setMessage("Please enter a valid Number")
+            }
+        }else{
+            setMessage("Please Accept Term and condition and privacy Policy")
         }
-        catch (err) {
-            console.error(err);
-        }
-        if(token!==null){
-            await AsyncStorage.setItem('LOGIN_TOKEN',token);
-        }
+        
     }
 
 
@@ -94,7 +101,7 @@ export default function Login({navigation}) {
                                 <MaterialCommunityIcons name="account-key-outline" size={24} color="#878787" />
                             </View>
                             <TextInput style={styles.textinput}
-                            secureTextEntry={true}
+                            secureTextEntry={!eye}
                             placeholder="Password"
                             placeholderTextColor="#878787"
                             value={password}

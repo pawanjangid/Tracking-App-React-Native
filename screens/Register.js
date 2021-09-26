@@ -15,34 +15,67 @@ export default function Register({navigation}) {
     const [eye,setEye] = useState(false);
     const [message,setMessage] = useState();
 
-    function PressHandler() {
-        Alert.alert("Phone: "+phone+" Password: "+password);
 
-        fetch('https://gettruckingbackend.herokuapp.com/users/', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email:mail,
-                phone: phone,
-                password: password
-            })
+
+    const [userOTP,setUserOTP] = useState();
+    const [otp,setOTP] = useState(100000 + Math.floor(Math.random() * 900000));
+    const [verification,setVerification] = useState(true);
+
+
+
+    function PressHandler() {
+        if(verification){
+            if(termCheck && policyCheck){
+                if(phone.length===10){
+                    fetch('https://gettruckingbackend.herokuapp.com/users/', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email:mail,
+                            phone: phone,
+                            password: password
+                        })
+                    })
+                        .then((response) => response.json())
+                        .then((responseData) => {
+                                if(responseData.success === 1) {
+                                    navigation.navigate('Root',{screen:"Login"});
+                                }else{
+                                    setMessage(responseData.data)
+                                }
+                            })
+                        .catch((error) =>{
+                            setMessage(error)
+                        })
+                }else{
+                    setMessage('Mobile Number is not Valid');
+                }
+            }else{
+                setMessage("Please Accept Term and condition and privacy Policy");
+            }
+        }else{
+            setMessage("Please Verify Your Number");
+        }
+    }
+
+    function sendOTP(){
+       
+        var url = "http://gateway.onewaysms.com.au:10001/api.aspx?apiusername=APIXTDN4S5ADS&apipassword=APIXTDN4S5ADSXTDN4&senderid=TEST&mobileno="+phone+"&message=Your one time password is"+otp+"&languagetype=1"
+
+        fetch(url, {
+            method: 'GET'
         })
             .then((response) => response.json())
             .then((responseData) => {
-                    if(responseData.success === 1) {
-                        navigation.navigate('Root',{screen:"Login"});
-                    }else{
-                        setMessage(responseData.data)
-                    }
+                    console.log(responseData)
                 })
             .catch((error) =>{
                 setMessage(error)
             })
     }
-
   return (
             <View style={styles.container}>
                 <View style={styles.backButtonContainer}>
@@ -76,6 +109,7 @@ export default function Register({navigation}) {
                             <TextInput style={styles.textinput}
                             placeholder="Email (Optional)"
                             placeholderTextColor="#878787"
+                            autoCompleteType="email"
                             value={mail}
                             onChangeText={(e)=>{setMail(e)}}
                             />
@@ -88,7 +122,7 @@ export default function Register({navigation}) {
                                 <MaterialCommunityIcons name="account-key-outline" size={24} color="#878787" />
                             </View>
                             <TextInput style={styles.textinput}
-                            secureTextEntry={true}
+                            secureTextEntry={!eye}
                             placeholder="Password"
                             placeholderTextColor="#878787" />
                             <View style={styles.iconContainer}>

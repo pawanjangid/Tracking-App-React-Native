@@ -6,14 +6,84 @@ import {
   TouchableHighlight,
   Modal,
   TextInput,
-  Alert
+  Alert,
+  FlatList
 } from 'react-native';
 import { Ionicons,FontAwesome,Feather } from '@expo/vector-icons'
 import Constant from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 export default function MyDrivers({navigation})  {
 
     const [modalVisible, setModalVisible] = useState(false);
     const [phone,setPhone] = useState();
+    const [message,setMessage] = useState();
+    const [drivers,setDrivers] = useState([]);
+    const [driverviews,setDriverviews] = useState(false);
+    const [count,setCount] = useState(0);
+
+    useEffect(() => {
+      AsyncStorage.getItem('LOGIN_TOKEN').then((value) => {
+        if(value!==null){
+          fetch('https://gettruckingbackend.herokuapp.com/users/favoriteDriver', {
+              method: 'GET',
+              headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json',
+                  'authorization':value
+              }
+          })
+              .then((response) => response.json())
+              .then((responseData) => {
+                      if(responseData.success === 1) {
+                            setDriverviews(true);
+                            setDrivers(responseData.data);
+                      }else{
+                          setMessage(responseData.message)
+                          console.log(responseData);
+                      }
+                  })
+              .catch((error) =>{
+                  setMessage(error)
+              })
+        }
+      })
+    },[count])
+
+
+    function onsubmitHandler(){
+      AsyncStorage.getItem('LOGIN_TOKEN').then((value) => {
+          if(value!==null){
+            fetch('https://gettruckingbackend.herokuapp.com/users/favoriteDriver', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'authorization':value
+                },
+                body: JSON.stringify({
+                    phone:phone
+                })
+            })
+                .then((response) => response.json())
+                .then((responseData) => {
+                        if(responseData.success === 1) {
+                              setCount(count+1);
+                              Alert.alert("Driver Added Successfully")
+                        }else{
+                            setMessage(responseData.message)
+                            Alert.alert("Unable to save response");
+                        }
+                    })
+                .catch((error) =>{
+                    setMessage(error)
+                })
+          }
+        })
+  }
+
+
+
     return (
       <View style={{marginTop:Constant.statusBarHeight,backgroundColor:"#f5f5f5",flex:1}}>
           <View style={styles.headerBar}>
@@ -26,21 +96,40 @@ export default function MyDrivers({navigation})  {
           </View>
           <View style={styles.body}>
             <View style={styles.bodyContent}>
-                    <View style={{justifyContent:"center",alignItems:"center",marginTop:200}}>
-                        <FontAwesome name="user-circle" size={70} color="#919191" />
+                    
+                    {!driverviews && <View>
+                        <View style={{alignItems:"center",marginTop:200}}>
+                            <FontAwesome name="user-circle" size={70} color="#919191" />
+                        </View>
+                        <View style={{justifyContent:"center",alignItems:"center",padding:30}}>
+                            <Text>Not any data here</Text>
+                        </View>
+                      </View>}
+                    <View>
+                    <FlatList
+                      data={drivers}
+                      renderItem={({item})=>{
+                        return(
+                          <View style={{paddingLeft:10,paddingRight:10,paddingBottom:10}}>
+                            <View style={{justifyContent:"space-around",padding:20,flexDirection:"row",backgroundColor:"#e0e0e0",borderRadius:10,elevation:2}}>
+                              <View style={{justifyContent:"center"}}>
+                                <Text style={{fontSize:16,fontWeight:"bold"}}>{item.fullName}</Text>
+                              </View>
+                              <View style={{justifyContent:"center"}}>
+                                <Text style={{fontSize:16,fontWeight:"bold"}}>{item.phone}</Text>
+                              </View>
+                            </View>
+                          </View>
+                        )
+                      }}
+                      keyExtractor={(item) => item.favdriver_id.toString()}
+                    />
                     </View>
-                    <View style={{justifyContent:"center",alignItems:"center",padding:30}}>
-                        <Text>you do not added any driver here.</Text>
-                    </View>
-
                     <Modal
                         animationType="slide"
                         transparent={true}
                         visible={modalVisible}
-                        onRequestClose={() => {
-                        Alert.alert("Driver Added Successfully");
-                        setModalVisible(!modalVisible);
-                        }}
+                        onRequestClose={() => {setModalVisible(!modalVisible)}}
                     >
                         <View style={styles.centeredView}>
                         <View style={styles.modalView}>
@@ -63,7 +152,7 @@ export default function MyDrivers({navigation})  {
                                     </View>
                                 </View>
                                 <View style={{justifyContent:"center",alignItems:"center"}}>
-                                    <TouchableHighlight style={[styles.buttonContainer,{marginTop:0}]}>
+                                    <TouchableHighlight style={[styles.buttonContainer,{marginTop:0}]} onPress={() =>{onsubmitHandler();setModalVisible(!modalVisible)}}>
                                         <View>
                                             <Text style={{fontWeight:"bold",color:"white"}}>Add Driver</Text>
                                         </View>
@@ -74,20 +163,15 @@ export default function MyDrivers({navigation})  {
                         </View>
                     </Modal>
 
-
-
-
-                    <View style={{justifyContent:"center",alignItems:"center",}}>
-                        <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)'  style={styles.buttonContainer} onPress={() => setModalVisible(!modalVisible)}>
-                            <View>
-                                <Text style={{fontWeight:"bold",color:"white"}}>Add Driver</Text>
-                            </View>
-                        </TouchableHighlight>
-                    </View>
-                    
             </View>
            </View>
-           
+           <View style={{justifyContent:"center",alignItems:"center",}}>
+                <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)'  style={styles.buttonContainer} onPress={() => setModalVisible(!modalVisible)}>
+                    <View>
+                        <Text style={{fontWeight:"bold",color:"white"}}>Add Driver</Text>
+                    </View>
+                </TouchableHighlight>
+            </View>
         </View>
     )
 }
@@ -105,7 +189,8 @@ const styles = StyleSheet.create({
     justifyContent:"center"
   },
   body:{
-      padding:1
+      padding:1,
+      flex:1
   },
   bodyContent: {
     paddingTop:30

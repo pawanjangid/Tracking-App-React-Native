@@ -1,8 +1,8 @@
 import  React,{useState} from 'react';
-import { Ionicons,Feather,MaterialIcons,FontAwesome5,FontAwesome  } from '@expo/vector-icons';
-import {View,Text,Switch, TouchableOpacity,TextInput,ScrollView,Button,StyleSheet,SafeAreaView,FlatList,Modal,Pressable  } from 'react-native';
+import { MaterialIcons,FontAwesome5,FontAwesome  } from '@expo/vector-icons';
+import {View,Text,Switch,TouchableHighlight} from 'react-native';
 import Constant from 'expo-constants';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function Settings({navigation}) {
@@ -14,29 +14,31 @@ export default function Settings({navigation}) {
     const toggleSwitch1 = () => setIsEnabled1(previousState => !previousState);
  return (
       <View style={{backgroundColor:"#fff",marginTop:Constant.statusBarHeight}}>
-                <View style={{padding:15,
-                    flexDirection:'row',
-                    justifyContent:'space-around',
-                    borderBottomWidth:1,
-                    borderBottomColor:"#f5f5f5"
-                    }}>
-                    <View style={{paddingTop:15}}>
-                        <FontAwesome5 name="user" size={24} color="black" />
+                <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>{navigation.navigate("EditProfile")}}>
+                    <View style={{padding:15,
+                        flexDirection:'row',
+                        justifyContent:'space-around',
+                        borderBottomWidth:1,
+                        borderBottomColor:"#f5f5f5"
+                        }}>
+                        <View style={{paddingTop:15}}>
+                            <FontAwesome5 name="user" size={24} color="black" />
+                        </View>
+                        <View style={{width:"70%"}}>
+                            <Text style={{
+                                padding:8,
+                                borderRadius:10,
+                                paddingLeft:10,
+                                fontSize:16,
+                                fontWeight:'bold'
+                                }} >Sachin Khendawal</Text>
+                                <Text style={{paddingLeft:10,color:"#999"}}>+9876453421038</Text>
+                        </View>
+                        <View style={{paddingTop:15}}>
+                            <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" />
+                        </View>
                     </View>
-                    <View style={{width:"70%"}}>
-                        <Text style={{
-                            padding:8,
-                            borderRadius:10,
-                            paddingLeft:10,
-                            fontSize:16,
-                            fontWeight:'bold'
-                            }} >Sachin Khendawal</Text>
-                            <Text style={{paddingLeft:10,color:"#999"}}>+9876453421038</Text>
-                    </View>
-                    <View style={{paddingTop:15}}>
-                        <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" onPress={() =>{navigation.navigate("EditProfile")}} />
-                    </View>
-                </View>
+                </TouchableHighlight>
                 <View style={{padding:15,
                     flexDirection:'row',
                     justifyContent:'space-around',
@@ -181,7 +183,7 @@ export default function Settings({navigation}) {
                             }} >Privacy Policy</Text>
                     </View>
                     <View style={{paddingTop:4}}>
-                        <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" onPress={() =>{navigation.navigate("PlaceOrder")}} />
+                        <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" onPress={() =>{navigation.navigate('Root',{screen:'PrivacyPolicy'})}} />
                     </View>
                 </View>
                 <View style={{padding:15,
@@ -228,6 +230,7 @@ export default function Settings({navigation}) {
                         <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" onPress={() =>{navigation.navigate("PlaceOrder")}} />
                     </View>
                 </View>
+                <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>{AsyncStorage.removeItem('LOGIN_TOKEN');navigation.navigate('Root',{screen:"Login"})}}>
                 <View style={{padding:15,
                     flexDirection:'row',
                     justifyContent:'space-around',
@@ -250,7 +253,7 @@ export default function Settings({navigation}) {
                         <MaterialIcons name="logout" size={24} color="#858585" />
                     </View>
                 </View>
-                
+                </TouchableHighlight>
         </View>
     );
   }

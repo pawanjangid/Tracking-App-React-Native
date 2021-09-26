@@ -21,6 +21,11 @@ import Coupons from '../screens/Coupons';
 import SelectVehicle from '../screens/SelectVehicle';
 import AdditionalService from '../screens/AdditionalService';
 import PlaceOrder from '../screens/PlaceOrder';
+import InitialRegion from '../screens/InitialRegion';
+import MapAndDetail from '../screens/MapAndDetail';
+import Tracking from '../screens/Tracking';
+import PrivacyPolicy from '../screens/PrivacyPolicy';
+import SupportChat from '../screens/SupportChat';
 const Stack = createStackNavigator();
 
 function HomeStack() {
@@ -33,6 +38,7 @@ function HomeStack() {
       <Stack.Screen name="Notification" component={Notifications} options={{ swipeEnabled: false }} />
       <Stack.Screen name="TopupList" component={TopupList} options={{ swipeEnabled: false }} />
       <Stack.Screen name="Checkout" component={Checkout} options={{ swipeEnabled: false }} />
+      <Stack.Screen name="Tracking" component={Tracking} options={{ swipeEnabled: false }} />
       <Stack.Screen name="Coupons" component={Coupons} options={{ swipeEnabled: false }} />
       <Stack.Screen name="SelectVehicle" component={SelectVehicle} options={{ swipeEnabled: false }} />
       <Stack.Screen name="AdditionalService" component={AdditionalService} options={{ swipeEnabled: false }} />
@@ -40,6 +46,8 @@ function HomeStack() {
       <Stack.Screen name="More" component={More} options={{ swipeEnabled: false }} />
       <Stack.Screen name="PlaceOrder" component={PlaceOrder} options={{ swipeEnabled: false }} />
       <Stack.Screen name="MyOrders" component={MyOrder} options={{ swipeEnabled: false }} />
+      <Stack.Screen name="InitialRegion" component={InitialRegion} options={{ swipeEnabled: false }}  />
+      <Stack.Screen name="MapAndDetail" component={MapAndDetail} options={{ swipeEnabled: false }}  />
       <Stack.Screen name="TrackOrder" component={TrackOrder} options={{ swipeEnabled: false }} />
       <Stack.Screen name="ManageDriver" component={ManageDriver} options={{ swipeEnabled: false }} />
       <Stack.Screen name="OrderHistory" component={More} options={{ swipeEnabled: false }} />
@@ -48,6 +56,8 @@ function HomeStack() {
       <Stack.Screen name="OrderPayment" component={OrderPayment} options={{ swipeEnabled: false }} />
       <Stack.Screen name="EditProfile" component={EditProfile} options={{ swipeEnabled: false }} />
       <Stack.Screen name="ReferEarn" component={ReferEarn} options={{ swipeEnabled: false }} />
+      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} options={{ swipeEnabled: false }} />
+      <Stack.Screen name="SupportChat" component={SupportChat} options={{ swipeEnabled: false }} />
     </Stack.Navigator>
   );
 }

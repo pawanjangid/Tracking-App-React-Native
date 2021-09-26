@@ -1,107 +1,94 @@
 import React,{useState,useEffect} from 'react';
-import {View,Text,StyleSheet,Image,ScrollView,Alert,TouchableHighlight,Modal,CheckBox,TextInput} from 'react-native';
+import {View,Text,StyleSheet,Image,ScrollView,Alert,TouchableHighlight,Modal,CheckBox } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AntDesign,MaterialIcons,Entypo,FontAwesome5,Feather,Ionicons,EvilIcons } from '@expo/vector-icons';
+import { AntDesign,MaterialIcons,Entypo,FontAwesome5,Feather } from '@expo/vector-icons';
 import Constants from 'expo-constants';
-import * as Location from 'expo-location';
-import MapView, { Marker } from 'react-native-maps';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-
-
-function Home({navigation}) {
+function Home({navigation,route}) {
 
 const [element,setElement] = useState([]);
 var key = 'AddStop';
 const [elementkey,setElementKey] = useState(1);
 const [modalVisible, setModalVisible] = useState(false);
-const [locationType, setLocationType] = useState('');
-
 const [locationModal, setLocationModal] = useState(false);
-const [initialRegion,setInitialRegion] = useState();
-const [location, setLocation] = useState();
-const [locations, setLocations] = useState([]);
-const [errorMsg, setErrorMsg] = useState(null);
-const [addresses, setAddresses] = useState();
-
 const [isSelected, setSelection] = useState(true);
-
 const [pickText,setPickText] = useState('ASAP');
+const [finaldata,setFinalData] = useState([]);
+const [pickup,setPickUp] = useState('Pickup Location');
+const [drop,setDrop] = useState('Where to..');
+const [laterDate,setLaterDate] = useState();
+const [date, setDate] = useState(new Date());
+const [mode, setMode] = useState('date');
+const [show, setShow] = useState(false);
 
-const [orderParams,setOrderParams] = useState({
-  locations:[
-    {
-      latitude:0.0,
-      langitude:0.0,
-    },
-    {
-      latitude:0.0,
-      langitude:0.0,
-    },
-    {
-      latitude:0.0,
-      langitude:0.0,
-    },
-    {
-      latitude:0.0,
-      langitude:0.0,
-    }
-],
-asap:true,
-later:false
-})
+
+function checkZero(data){
+  if(data.length == 1){
+    data = "0" + data;
+  }
+  return data;
+}
+
+function convert (str){
+  var date = new Date(str).toLocaleString("en-US", {timeZone: 'Asia/Kolkata'});
+  var testdate = new Date(date);
+  var final = checkZero(testdate.getDate())+'-'+ checkZero(testdate.getMonth()+1) +'-'+ testdate.getFullYear()+', '+checkZero(testdate.getHours())+':'+checkZero(testdate.getMinutes());
+  return final;
+}
+
+const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShow(Platform.OS === 'ios');
+    setDate(currentDate);
+    setLaterDate(convert(currentDate));
+};
+
+const showMode = (currentMode) => {
+  setShow(true);
+  setMode(currentMode);
+};
+
+const showDatepicker = () => {
+  showMode('date');
+};
+
+const showTimepicker = () => {
+  showMode('time');
+};
 
 
 
 useEffect(() => {
+  if(route.params){
+    setFinalData(route.params.finaldata);
+    var result = (route.params.finaldata).filter(column => column.type=='PickUp');
+    if(result.length>0){
+      setPickUp(result[0].floor);
+    }
+    var result = (route.params.finaldata).filter(column => column.type=='Drop');
+    if(result.length>0){
+      setDrop(result[0].floor);
+    }
+  }
+});
+
+
+useEffect(() => {
   AsyncStorage.getItem('LOGIN_TOKEN').then((value) => {
-    if(value==null){
+    if(value===null){
       navigation.navigate('Root',{screen:'Login'})
     }
   })
 })
 
-
-function checkType(column) {
-  return !(column.type==locationType)
-}
-
-function updateLocation(){
-  let filteredLocation = locations.filter(checkType);
-  setLocations([{location:location,type:locationType,title:addresses},...filteredLocation]);
-  Alert.alert("PickUp location added successfully");
-}
-
-
-useEffect(() => {
-  (async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      setErrorMsg('Permission to access location was denied');
-      return;
-    }
-
-    let location = await Location.getCurrentPositionAsync({});
-    setInitialRegion({
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-      latitudeDelta: 0.05,
-      longitudeDelta: 0.05,
-    })
-  })();
-}, []);
-
-
-
-
-
-
 function selectVehicleClick(){
-
-    navigation.navigate('Root',{screen:'SelectVehicle',params:{locations,asap:pickText}})
+    navigation.navigate('Root',{screen:'SelectVehicle',params:{finaldata,asap:pickText}})
 }
 
 
 const StopLocation = () => (
+  <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={() => {navigation.navigate('Root',{screen:'InitialRegion',params:{type:"Stop",finaldata}})}}> 
         <View style={styles.dropContainer}>
             <View>
               <MaterialIcons name="location-pin" size={20} color="black" />
@@ -112,7 +99,8 @@ const StopLocation = () => (
             <View>
               <Entypo name="cross" size={20} color="black" onPress={() =>RemoveElement()}/>
             </View>
-        </View>)
+        </View>
+        </TouchableHighlight>)
 
 
   function addElement(){
@@ -127,28 +115,11 @@ const StopLocation = () => (
     setElementKey(elementkey-1)
   }
 
-
-  function chooseLocation(type){
-    setLocationType(type);
-    setLocationModal(!locationModal)
-  }
-
-
-
-  const homePlace = {
-    description: 'Home',
-    geometry: { location: { lat: 48.8152937, lng: 2.4597668 } },
-  };
-  const workPlace = {
-    description: 'Work',
-    geometry: { location: { lat: 48.8496818, lng: 2.2940881 } },
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.headerBar}>
         <View style={styles.headerIcon}>
-          <AntDesign name="menu-fold" size={24} color="black" onPress={() =>{setLocationModal(!locationModal)}}/>
+          <AntDesign name="menu-fold" size={24} color="black" onPress={() =>{navigation.openDrawer()}}/>
         </View>
         <View style={styles.headerName}>
             <Text style={{fontSize:16,fontWeight:"bold"}}>Get Trucking</Text>
@@ -169,60 +140,7 @@ const StopLocation = () => (
           </View>
         </View>
 
-        {/* Location Fetecher Modal */}
-
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={locationModal}
-            onRequestClose={() => {
-              Alert.alert("Location not saved");
-              setLocationModal(!locationModal);
-            }}
-          >
-            <View style={styles.locationModalContainer}>
-              <View style={styles.headerBar}>
-                <View style={styles.headerIcon}>
-                  <Ionicons name="arrow-back" size={24} color="black" onPress={() =>{setLocationModal(!locationModal)}} />
-                </View>
-                <View style={{width:"80%",paddingLeft:30,justifyContent:"center"}}>
-                    <Text style={{fontSize:16,fontWeight:"bold"}}>Get Trucking</Text>
-                </View>
-              </View>
-              
-              
-              
-
-
-              <View style={styles.locationModalView}>
-              <MapView
-                style={{width:"100%",height:"100%"}}
-                initialRegion={initialRegion}
-                showsUserLocation={true}
-                onRegionChange={(e)=>{setLocation(e)}}
-              >
-                
-              </MapView>
-              <View style={{position: "absolute",height:"100%",width:"100%",justifyContent:"center",alignItems:"center"}}>
-                  <EvilIcons name="location" size={50} color="#000473" />
-              </View>
-              </View>
-              <View>
-                  <View style={styles.Inputcontainer}>
-                      <TextInput style={styles.textinput}
-                      placeholder="Enter Full Address"
-                      placeholderTextColor="#878787"
-                      value={addresses}
-                      onChangeText={(e)=>{setAddresses(e)}}
-                      />
-                    </View>
-              </View>
-              <TouchableHighlight style={styles.locationbuttonStyle} onPress={()=>{updateLocation()}} >
-                <Text style={{color: "white",fontSize:16,fontWeight:"bold"}}>Save</Text>  
-              </TouchableHighlight>
-            </View>
-          </Modal>
-      {/* end Location Fetecher Modal */}
+      
 
         <View style={styles.locationContainer}>
           <View style={styles.boxContainer}>
@@ -232,7 +150,7 @@ const StopLocation = () => (
                   <Entypo name="stopwatch" size={16} color="#6e6e6e" />
                 </View>
                 <View style={{width:"90%",paddingLeft:15}}>
-                  <Text style={{fontWeight:"bold"}}>Pick up {pickText}</Text>
+                  <Text style={{fontWeight:"bold"}}>Pick up {pickText==='Later' ? laterDate : pickText}</Text>
                 </View>
                 <View>
                   <MaterialIcons name="keyboard-arrow-right" size={20} color="black" />
@@ -253,7 +171,7 @@ const StopLocation = () => (
                 <View style={styles.modalView}>
                     <View >
                         <Text style={{fontSize:18}}>
-                            Add a favorite get trucking driver
+                            Pickup Later
                         </Text>
                         <View style={{marginTop:30}}>
                             <View style={styles.Inputcontainer}>
@@ -292,6 +210,34 @@ const StopLocation = () => (
                                         </View>
                               </View>
                           </View>
+                          <View style={{justifyContent:"center",alignItems:"center",padding:20}}>
+                              <Text style={{fontSize:16,fontWeight:"bold"}}>
+                                {laterDate}
+                              </Text>
+                            </View>
+                          <View style={{flexDirection: 'row',justifyContent:"space-around"}}>
+                            {show && (
+                              <DateTimePicker
+                                testID="dateTimePicker"
+                                value={date}
+                                mode={mode}
+                                is24Hour={true}
+                                display="default"
+                                onChange={onChange}
+                              />
+                            )}
+                            
+                            <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={() =>{showDatepicker()}}>
+                              <View style={{justifyContent:"center",alignItems:"center",padding:10,borderWidth:0.5,borderColor:"gray",borderRadius:10,backgroundColor:"#f2f2f2"}}>
+                                <Text>Select Date</Text>
+                              </View>
+                            </TouchableHighlight> 
+                            <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={() =>{showTimepicker()}}>
+                              <View style={{justifyContent:"center",alignItems:"center",padding:10,paddingLeft:20,paddingRight:20,borderWidth:0.5,backgroundColor:"#f2f2f2",borderColor:"gray",borderRadius:10}}>
+                                <Text>Time</Text>
+                              </View>
+                            </TouchableHighlight>         
+                          </View>
                           <View style={{justifyContent:"center",alignItems:"center"}}>
                             <TouchableHighlight style={[styles.CloseContainer,{backgroundColor:"red"}]} onPress={() => setModalVisible(!modalVisible)}>
                                 <View>
@@ -304,26 +250,26 @@ const StopLocation = () => (
                 </View>
             </Modal>
             
-            <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={() => chooseLocation('PickUp')}>                     
+            <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={() => {navigation.navigate('Root',{screen:'InitialRegion',params:{type:"PickUp",finaldata}})}}>                     
               <View style={styles.routerContainer}>
                   <View>
                     <FontAwesome5 name="dot-circle" size={16} color="black" />
                   </View>
                   <View style={{width:"90%",paddingLeft:15}}>
-                    <Text style={{color:"#8a8a8a",fontWeight:"bold"}}>Pickup Location</Text>
+                    <Text style={{color:"#8a8a8a",fontWeight:"bold"}}>{pickup}</Text>
                   </View>
                   <View>
-                      <MaterialIcons name="location-searching" size={20} color="black" onPress={()=>{Alert.alert("Fetching Your current location")}} />
+                      <MaterialIcons name="location-searching" size={20} color="black" />
                   </View>
               </View>
             </TouchableHighlight> 
-            <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={() => chooseLocation('Drop')}>     
+            <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={() => {navigation.navigate('Root',{screen:'InitialRegion',params:{type:"Drop",finaldata}})}}>     
             <View style={styles.dropContainer}>
                 <View>
                   <MaterialIcons name="location-pin" size={20} color="black" />
                 </View>
                 <View style={{width:"93%",paddingLeft:15}}>
-                  <Text style={{color:"#8a8a8a",fontWeight:"bold"}}>Where to...</Text>
+                  <Text style={{color:"#8a8a8a",fontWeight:"bold"}}>{drop}</Text>
                 </View>
             </View>
             </TouchableHighlight>

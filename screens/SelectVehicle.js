@@ -17,13 +17,16 @@ export default function Wallet({navigation,route})  {
         navigation.navigate("Home");
         return true;
       }
+
+      const [duration,setDuration] = useState(0);
+      const [distance,setDistance] = useState(0);
     
       useEffect(() => {
-        
+         fetchDistanceBetweenPoints();
 
         fetch('https://gettruckingbackend.herokuapp.com/vehicle/')
         .then((response) => response.json())
-        .then((json) => {setVehicle(json.data)})
+        .then((json) => {setVehicle(json.data);console.log(json.data)})
         .catch((error) => console.error(error));
         
 
@@ -38,12 +41,28 @@ export default function Wallet({navigation,route})  {
 
 
     function onClickHandler(item){
-      console.log(route.params);
         setSelectedItem(item);
-
-        navigation.navigate('Root',{screen:'AdditionalService',params:{...route.params,item}})
+        navigation.navigate('Root',{screen:'AdditionalService',params:{...route.params,item,distance:distance,duration:duration}})
 
     }
+
+    const fetchDistanceBetweenPoints = () => {
+               var urlToFetchDistance =  'https://maps.googleapis.com/maps/api/distancematrix/json?destinations='+route.params.finaldata[1].latitude+'%2C'+route.params.finaldata[1].longitude+'&origins='+route.params.finaldata[0].latitude+'%2C'+route.params.finaldata[0].longitude+'&key=AIzaSyD55uiGQUVs640sz5lAIdjatu6ZAxk4ybo';
+                fetch(urlToFetchDistance)
+              .then(res => {return res.json()})
+              .then(res => {
+                console.log(res);
+                let distance = res.rows[0].elements[0].distance.text;
+                let duration = res.rows[0].elements[0].duration.text;
+                setDuration(duration);
+                setDistance(distance);
+                console.log(distanceString)
+              })
+              .catch(error => {
+                        console.log("Problem occurred");
+              });
+  
+  }
 
     return (
       <View style={{marginTop:Constant.statusBarHeight,backgroundColor:"white",flex:1}}>
@@ -74,7 +93,7 @@ export default function Wallet({navigation,route})  {
                                                 </Text>
                                             </View>
                                             <View style={styles.vehicledescriptionContainer}>
-                                                <Text style={styles.vehicledescription}>
+                                                <Text numberOfLines={1} style={styles.vehicledescription}>
                                                     {item.description}
                                                 </Text>
                                             </View>
@@ -83,6 +102,15 @@ export default function Wallet({navigation,route})  {
                                                     {item.dimension}
                                                 </Text>
                                             </View>
+                                            <View style={[styles.vehicleDiomensinContainer,{flexDirection:"row",justifyContent:"space-around"}]}>
+                                                <Text style={[styles.vehicleDimension,{fontWeight:"bold",color:"green"}]}>
+                                                    Base Price : {item.baseprice}
+                                                </Text>
+                                                <Text style={[styles.vehicleDimension,{fontWeight:"bold",color:"green"}]}>
+                                                    Cost/km : {parseInt(item.parKmcost)}
+                                                </Text>
+                                            </View>
+                                            
                                         </View>
                                     </View>
                                 </TouchableHighlight>
