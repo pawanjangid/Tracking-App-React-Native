@@ -70,7 +70,8 @@ export default function Orders({navigation})  {
   );
   
   const renderScene = SceneMap({
-    first: ()=>{
+    first: SecondRoute,
+    second: ()=>{
       return(
         <View style={{ flex: 1}} >
           <FlatList
@@ -108,7 +109,6 @@ export default function Orders({navigation})  {
       </View>
       )
     },
-    second: SecondRoute,
     third: ThirdRoute,
   });
 

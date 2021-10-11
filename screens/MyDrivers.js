@@ -9,7 +9,7 @@ import {
   Alert,
   FlatList
 } from 'react-native';
-import { Ionicons,FontAwesome,Feather } from '@expo/vector-icons'
+import { Ionicons,FontAwesome,Feather,AntDesign } from '@expo/vector-icons'
 import Constant from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -117,6 +117,9 @@ export default function MyDrivers({navigation})  {
                               </View>
                               <View style={{justifyContent:"center"}}>
                                 <Text style={{fontSize:16,fontWeight:"bold"}}>{item.phone}</Text>
+                              </View>
+                              <View style={{justifyContent:"center",width:24}}>
+                                <AntDesign name="delete" size={24} color="black" onPress={()=>{Alert.alert("Driver removed from your favorite list")}} />
                               </View>
                             </View>
                           </View>

@@ -35,6 +35,7 @@ export default function Login({navigation}) {
                     })
                         .then((response) => response.json())
                         .then((responseData) => {
+                                console.log(responseData);
                                 if(responseData.success === 1) {
                                    setToken(responseData.token);
                                 }else{

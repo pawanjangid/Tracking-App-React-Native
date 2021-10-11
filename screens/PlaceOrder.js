@@ -10,7 +10,8 @@ import {
   Pressable,
   Modal,
   TextInput,
-  FlatList
+  FlatList,
+  CheckBox
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons ,FontAwesome5,MaterialIcons,MaterialCommunityIcons} from '@expo/vector-icons'
@@ -30,12 +31,27 @@ export default function Wallet({navigation,route})  {
         navigation.goBack();
         return true;
       }
-
+    const [balanceModal,setBalanceModal] = useState(false);
     const [driveNote,setDriverNote] = useState('No any Note');
     const [noteModal,setNoteModal] = useState(false);
     const [drivers,setDrivers] = useState([]);
     const [preferedDriver,setPreferedDriver] = useState(0);
     const [pereferedName,setPreferedName] = useState();
+    const [walletamount,setWalletAmount] = useState(400);
+    const [walletSelect,setWalletSelect] = useState(false);
+    const [online,setOnline] = useState(false);
+
+
+    function toggleMethod(){
+        if(walletSelect){
+            setWalletSelect(false);
+            setOnline(true);
+        }else{
+            setOnline(false);
+            setWalletSelect(true);
+        }
+    }
+
       const [pickup,setPickUp] = useState();
       useEffect(() => {
         var pickup = route.params.selectedItem.finaldata.filter(item=>item.type === 'PickUp');
@@ -233,6 +249,55 @@ export default function Wallet({navigation,route})  {
                             </View>
                         </View>
                         </Modal>
+
+                        <Modal
+                        animationType="slide"
+                        transparent={true}
+                        visible={balanceModal}
+                        onRequestClose={() => {
+                            Alert.alert("Are you sure to cancel ..");
+                            setBalanceModal(!balanceModal);
+                        }}
+                        >
+                        <View style={styles.centeredView}>
+                            <View style={styles.modalView}>
+                                <View  style={{flexDirection: 'row',justifyContent:'flex-start',padding:10,paddingLeft:10,backgroundColor:"#f5fff7",borderRadius:10}}>
+                                    <View style={{justifyContent:'center'}}>
+                                    <CheckBox
+                                        value={walletSelect}
+                                        onValueChange={()=>{toggleMethod()}}
+                                        style={{}}
+                                        />
+                                    </View>
+                                    <View style={{justifyContent:'center'}}>
+                                        <Text style={{fontSize:16,fontWeight:"bold"}}>Wallet balance :</Text>
+                                    </View>
+                                    <View style={{justifyContent:'center'}}>
+                                        <Text style={{fontSize:16,fontWeight:"bold"}}>${walletamount}</Text>
+                                    </View>
+                                </View>
+                                <View  style={{flexDirection: 'row',justifyContent:'flex-start',padding:10,paddingLeft:10,backgroundColor:"#f5fff7",borderRadius:10,marginTop:10}}>
+                                    <View style={{justifyContent:'center'}}>
+                                    <CheckBox
+                                        value={online}
+                                        onValueChange={()=>{toggleMethod()}}
+                                        style={{}}
+                                        />
+                                    </View>
+                                    <View style={{justifyContent:'center'}}>
+                                        <Text style={{fontSize:16,fontWeight:"bold"}}>Pay Online</Text>
+                                    </View>
+                                   
+                                </View>
+                                <View style={{alignItems:"center",padding:10}}>
+                                    <Pressable style={{padding:10,backgroundColor:"#868dbd",borderRadius:20}} onPress={()=>{onsubmitHandler()}}>
+                                        <Text style={{fontSize:16,fontWeight:"bold",color:"white"}}>Pay Now</Text>
+                                    </Pressable>
+                                </View>
+                                
+                            </View>
+                        </View>
+                        </Modal>
                 <View style={{padding:5}}>
                 <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>{setNoteModal(!noteModal)}}>
                     <View style={{padding:10,flexDirection:"row",justifyContent:"space-around"}}>
@@ -353,7 +418,7 @@ export default function Wallet({navigation,route})  {
                     <Text style={{fontSize:20,fontWeight:"bold"}}>S${route.params.amount}</Text>
                 </View>
             <View style={{justifyContent:"center",padding:30}}>
-                    <TouchableHighlight style={styles.buttonStyle} underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>{onsubmitHandler()}}>
+                    <TouchableHighlight style={styles.buttonStyle} underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>{setBalanceModal(!balanceModal)}} >
                         <Text style={{fontWeight:"bold",fontSize:16,color:'white'}}>Place Order</Text>
                     </TouchableHighlight>
             </View>
