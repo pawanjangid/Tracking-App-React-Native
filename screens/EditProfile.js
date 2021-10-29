@@ -1,6 +1,6 @@
 import * as React from 'react';
-import {useState} from 'react';
-import { StyleSheet, Text, View,Image,Button } from 'react-native';
+import {useState,useEffect} from 'react';
+import { StyleSheet, Text, View,BackHandler,Button } from 'react-native';
 import { MaterialIcons,Feather } from '@expo/vector-icons'; 
 import { TextInput } from 'react-native';
 import { Alert } from 'react-native';
@@ -16,6 +16,22 @@ export default function EditProfile({navigation}) {
         Alert.alert("Phone: "+phone+" Password: "+password);
         navigation.navigate("Home");
     }
+
+
+    
+    function handleBackButtonClick() {
+        navigation.navigate("Settings");
+        return true;
+      }
+    
+
+    useEffect(() => {
+        BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+        return () => {
+          BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
+        };
+      }, []);
+
 
   return (
             <View style={styles.container}>

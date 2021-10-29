@@ -57,8 +57,7 @@ export default function Login({navigation}) {
             }
         }else{
             setMessage("Please Accept Term and condition and privacy Policy")
-        }
-        
+        } 
     }
 
 
@@ -115,7 +114,7 @@ export default function Login({navigation}) {
                     </View>
                     <View style={styles.CheckBoxcontainer}>
                             <View style={styles.iconContainer}>
-                                <CheckBox style={styles.checkbox}  value={termCheck} onValueChange={setTermCheck} tintColors={{ true: '#424fff', false: 'black' }} />
+                                <CheckBox style={styles.checkbox}  value={termCheck} onValueChange={setTermCheck} tintColors={{ true: '#000473', false: 'black' }} />
                             </View>
                             <View style={styles.CheckBoxContent}>
                                 <Text>
@@ -125,7 +124,7 @@ export default function Login({navigation}) {
                     </View>
                     <View style={styles.CheckBoxcontainer}>
                             <View style={styles.iconContainer}>
-                                <CheckBox style={styles.checkbox} value={policyCheck} onValueChange={setPolicyCheck} tintColors={{ true: '#424fff', false: 'black' }}  />
+                                <CheckBox style={styles.checkbox} value={policyCheck} onValueChange={setPolicyCheck} tintColors={{ true: '#000473', false: 'black' }}  />
                             </View>
                             <View style={styles.CheckBoxContent}  >
                                 <Text>
@@ -230,7 +229,8 @@ const styles = StyleSheet.create({
         padding:15,
         marginRight:30,
         marginLeft:30,
-        borderRadius:30
+        borderBottomLeftRadius:60,
+        borderTopEndRadius:60
     },
     buttontitle:{
         fontSize:20,

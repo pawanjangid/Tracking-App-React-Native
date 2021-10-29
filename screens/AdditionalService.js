@@ -7,7 +7,8 @@ import {
   BackHandler,
   Switch,
   TouchableHighlight,
-  FlatList
+  FlatList,
+  ScrollView
 } from 'react-native';
 
 import CheckBox from '../components/CheckBox';
@@ -137,7 +138,7 @@ export default function Wallet({navigation,route})  {
                 <Text style={{fontSize:16,fontWeight:"bold"}}>Select Vehicle</Text>
             </View>
           </View>
-          <View style={{padding:20,paddingBottom:80}}>
+          <ScrollView style={{padding:20,paddingBottom:20}}>
 
                 <View>
                     <View style={styles.vehicleContainer}>
@@ -265,7 +266,7 @@ export default function Wallet({navigation,route})  {
                         <Text style={{fontWeight:"bold",fontSize:16,color:'white'}}>Next</Text>
                     </TouchableHighlight>
                 </View>
-           </View>
+           </ScrollView>
         </View>
     )
 }

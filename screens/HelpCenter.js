@@ -52,7 +52,7 @@ export default function HelpCenter({navigation})  {
               </TouchableHighlight>
             </View>
             <View style={{padding:5}}>
-            <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>navigation.navigate('Root',{screen:'Feedback'})}>
+            <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>navigation.navigate('Root',{screen:'FeedBack'})}>
                 <View style={{padding:10,flexDirection:"row",justifyContent:"space-around"}}>
                     <Ionicons name="chatbox-ellipses-outline" size={24} color="#000473" />
                     <Text style={{width:"70%",padding:3,paddingLeft:0,fontSize:16}}>Send Feedback</Text>

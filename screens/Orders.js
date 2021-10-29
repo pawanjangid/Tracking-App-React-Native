@@ -16,7 +16,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Orders({navigation})  {
 
-  const [orders,setOrder] = useState([]);
+  const [completed,setCompleted] = useState([]);
+  const [running,setRunning] = useState([]);
+  const [canceled,setCanceled] = useState([]);
+  
   const [message,setMessage] = useState();
   const [driveNote,setDriverNote] = useState('No any Note');
   
@@ -34,7 +37,8 @@ export default function Orders({navigation})  {
             .then((response) => response.json())
             .then((responseData) => {
                     if(responseData.success === 1) {
-                        setOrder(responseData.data)
+                      setCompleted(responseData.data.filter(item => item.status==='completed'));
+                      setRunning(responseData.data.filter(item => item.status==='on_going'))
                     }else{
                         setMessage(responseData.data)
                         AsyncStorage.removeItem('LOGIN_TOKEN');
@@ -50,16 +54,6 @@ export default function Orders({navigation})  {
   },[])
 
 
-  
-  const SecondRoute = () => (
-    <View style={{ flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor: '#f7f7f7'}}>
-        <Image source={require("../assets/record.png")} style={{height:100,width:80,resizeMode:"stretch"}} />
-        <View style={{padding:20}}>
-          <Text>No transactions record found</Text>
-        </View>
-    </View>
-  );
-
   const ThirdRoute = () => (
     <View style={{ flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor: '#f7f7f7'}}>
         <Image source={require("../assets/record.png")} style={{height:100,width:80,resizeMode:"stretch"}} />
@@ -70,12 +64,11 @@ export default function Orders({navigation})  {
   );
   
   const renderScene = SceneMap({
-    first: SecondRoute,
-    second: ()=>{
+    first: ()=>{
       return(
         <View style={{ flex: 1}} >
-          <FlatList
-              data={orders}
+          {running.length>0  &&<FlatList
+              data={running}
               renderItem={({ item }) => <View style={{padding:20}}>
                 <View style={{backgroundColor:"#fafafa",borderRadius:10,elevation:5}}>
                 <View style={{padding:10}}>
@@ -88,13 +81,13 @@ export default function Orders({navigation})  {
                   <View style={{justifyContent:"center",padding:5}}>
                     <Text style={{fontSize:16,fontWeight:"bold"}}>Amount : ${item.amount}</Text>
                   </View>
-                  <View style={{flexDirection:"row",backgroundColor:"#000473",padding:5}}>
+                  <View style={{flexDirection:"row",backgroundColor:"rgba(0, 4, 115,0.03)",borderColor:"#000473",borderWidth:0.2,padding:5,borderRadius:20}}>
                     <View style={{justifyContent:"center",padding:5}}>
-                      <FontAwesome5 name="route" size={18} color="white" />
+                      <FontAwesome5 name="route" size={18} color="#000473" />
                     </View>
                     <TouchableHighlight onPress={()=>{navigation.navigate('Root',{screen:"Tracking",params:item})}}>
                       <View style={{justifyContent:"center",padding:5}}>
-                        <Text style={{fontWeight:"bold",color:"white"}}>Track Now</Text>
+                        <Text style={{fontWeight:"bold",color:"#000473"}}>Track Now</Text>
                       </View>
                     </TouchableHighlight>
                     
@@ -105,7 +98,57 @@ export default function Orders({navigation})  {
                 </View>
               </View>}
               keyExtractor={item => item.order_id.toString()}
-            />
+            />}
+            {running.length <=0 && <View style={{ flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor: '#f7f7f7'}}>
+              <Image source={require("../assets/record.png")} style={{height:100,width:80,resizeMode:"stretch"}} />
+              <View style={{padding:20}}>
+                <Text>No transactions record found</Text>
+              </View>
+          </View>}
+      </View>
+      )
+    },
+    second: ()=>{
+      return(
+        <View style={{ flex: 1}} >
+         {completed.length> 0 && <FlatList
+              data={completed}
+              renderItem={({ item }) => <View style={{padding:20}}>
+                <View style={{backgroundColor:"#fafafa",borderRadius:10,elevation:5}}>
+                <View style={{padding:10}}>
+                  <Text style={{fontSize:20,fontWeight:"bold"}}>{item.vehicle_name}</Text>
+                </View>
+                <View style={{paddingLeft:10}}>
+                  <Text>{item.description}</Text>
+                </View>
+                <View style={{flexDirection:"row",justifyContent:"space-around",padding:10}}>
+                  <View style={{justifyContent:"center",padding:5}}>
+                    <Text style={{fontSize:16,fontWeight:"bold"}}>Amount : ${item.amount}</Text>
+                  </View>
+                  <View style={{flexDirection:"row",backgroundColor:"rgba(0, 4, 115,0.03)",borderColor:"#000473",borderWidth:0.2,padding:5,borderRadius:20}}>
+                    <View style={{justifyContent:"center",padding:5}}>
+                      <FontAwesome5 name="save" size={18} color="#000473" />
+                    </View>
+                    <TouchableHighlight onPress={()=>{navigation.navigate('Root',{screen:"Tracking",params:item})}}>
+                      <View style={{justifyContent:"center",padding:5}}>
+                        <Text style={{fontWeight:"bold",color:"#000473"}}>Download Invoice</Text>
+                      </View>
+                    </TouchableHighlight>
+                    
+                    
+                  </View>
+                  
+                </View>
+                </View>
+              </View>}
+              keyExtractor={item => item.order_id.toString()}
+            />}
+            {completed.length <=0 && <View style={{ flex: 1,justifyContent: 'center',alignItems: 'center',backgroundColor: '#f7f7f7'}}>
+              <Image source={require("../assets/record.png")} style={{height:100,width:80,resizeMode:"stretch"}} />
+              <View style={{padding:20}}>
+                <Text>No transactions record found</Text>
+              </View>
+          </View>}
       </View>
       )
     },

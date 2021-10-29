@@ -9,9 +9,13 @@ import {
   FlatList,
   TouchableHighlight
 } from 'react-native';
+
+
+import SelectVehicle from '../components/SelectVehicle';
+
 import { Ionicons } from '@expo/vector-icons'
 import Constant from 'expo-constants';
-export default function Wallet({navigation,route})  {
+export default function SelectVehicles({navigation,route})  {
   const [vehicle,setVehicle] = useState([]);
     function handleBackButtonClick() {
         navigation.navigate("Home");
@@ -20,13 +24,15 @@ export default function Wallet({navigation,route})  {
 
       const [duration,setDuration] = useState(0);
       const [distance,setDistance] = useState(0);
-    
+      const [amount,setAmount] = useState(0);
+
+
       useEffect(() => {
          fetchDistanceBetweenPoints();
 
         fetch('https://gettruckingbackend.herokuapp.com/vehicle/')
         .then((response) => response.json())
-        .then((json) => {setVehicle(json.data);console.log(json.data)})
+        .then((json) => {setVehicle(json.data);})
         .catch((error) => console.error(error));
         
 
@@ -40,10 +46,11 @@ export default function Wallet({navigation,route})  {
     const [selectedItem,setSelectedItem] = useState();
 
 
-    function onClickHandler(item){
-        setSelectedItem(item);
-        navigation.navigate('Root',{screen:'AdditionalService',params:{...route.params,item,distance:distance,duration:duration}})
 
+
+
+    function onClickHandler(){
+        navigation.navigate('Root',{screen:'PlaceOrder',params:{...route.params,selectedItem,distance:distance,duration:duration,amount:amount,duration:duration}})
     }
 
     const fetchDistanceBetweenPoints = () => {
@@ -64,6 +71,9 @@ export default function Wallet({navigation,route})  {
   
   }
 
+
+
+
     return (
       <View style={{marginTop:Constant.statusBarHeight,backgroundColor:"white",flex:1}}>
           <View style={styles.headerBar}>
@@ -76,49 +86,31 @@ export default function Wallet({navigation,route})  {
           </View>
           <View style={{padding:20,paddingBottom:80}}>
             
-                <SafeAreaView style={styles.container}>
+                <SafeAreaView style={{paddingBottom:130}}>
                     <FlatList
                         data={vehicle}
                         renderItem={({ item })=>
                             (
-                                <TouchableHighlight key={item.vehicle_id.toString()} underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>onClickHandler(item)}>
-                                    <View key={item.vehicleId} style={styles.vehicleContainer}>
-                                        <View style={styles.vehicleImage}>
-                                            <Image source={{uri:'https://gettruckingbackend.herokuapp.com'+item.image}} style={{width:"100%",height:100,resizeMode:"stretch"}} />
-                                        </View>
-                                        <View style={styles.vehicleDetail}>
-                                            <View style={styles.vehicletitleContainer}>
-                                                <Text style={styles.vehicletitle}>
-                                                    {item.vehicle_name}
-                                                </Text>
-                                            </View>
-                                            <View style={styles.vehicledescriptionContainer}>
-                                                <Text numberOfLines={1} style={styles.vehicledescription}>
-                                                    {item.description}
-                                                </Text>
-                                            </View>
-                                            <View style={styles.vehicleDimensionContainer}>
-                                                <Text style={styles.vehicleDimension}>
-                                                    {item.dimension}
-                                                </Text>
-                                            </View>
-                                            <View style={[styles.vehicleDiomensinContainer,{flexDirection:"row",justifyContent:"space-around"}]}>
-                                                <Text style={[styles.vehicleDimension,{fontWeight:"bold",color:"green"}]}>
-                                                    Base Price : {item.baseprice}
-                                                </Text>
-                                                <Text style={[styles.vehicleDimension,{fontWeight:"bold",color:"green"}]}>
-                                                    Cost/km : {parseInt(item.parKmcost)}
-                                                </Text>
-                                            </View>
-                                            
-                                        </View>
-                                    </View>
-                                </TouchableHighlight>
+                              <SelectVehicle item={item} setAmount={setAmount} setSelectedItem={setSelectedItem}  distance={distance} />
                             )
                         }
                         keyExtractor={item => item.vehicle_id.toString()}
                     />
                 </SafeAreaView>
+           </View>
+           <View style={{position:"absolute",bottom:0,width:"100%",backgroundColor:"#f2f2f2",elevation:10}}>
+             <View style={{padding:20,paddingBottom:0,justifyContent:"center",alignItems:"center"}}>
+               <Text style={{fontSize:16,fontWeight:"bold"}}>Amount : {amount}</Text>
+             </View>
+             <TouchableHighlight style={{paddingTop:20}} onPress={()=>{onClickHandler()}}>
+              <View style={{backgroundColor:"#000473",padding:20,justifyContent:"center",alignItems:"center"}}>
+                
+                <Text style={{fontSize:20,fontWeight:"bold",color:"white"}}>
+                  Place Order
+                </Text>
+              </View>
+               
+             </TouchableHighlight>
            </View>
         </View>
     )

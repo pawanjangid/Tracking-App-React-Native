@@ -9,11 +9,11 @@ const GOOGLE_PLACES_API_KEY = 'AIzaSyD55uiGQUVs640sz5lAIdjatu6ZAxk4ybo';
 const InitialRegion = ({navigation,route}) => {
 
     function handleBackButtonClick() {
-        navigation.goBack();
+        navigation.navigate("Home");
         return true;
       }
     
-      var count = 0;
+
 
     const [initialRegion,setInitialRegion] = useState({
       latitude: 0,

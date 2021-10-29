@@ -1,6 +1,6 @@
 import  React,{useState} from 'react';
 import { MaterialIcons,FontAwesome5,FontAwesome  } from '@expo/vector-icons';
-import {View,Text,Switch,TouchableHighlight} from 'react-native';
+import {View,Text,Switch,TouchableHighlight,ScrollView} from 'react-native';
 import Constant from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -13,7 +13,7 @@ export default function Settings({navigation}) {
     const [isEnabled1, setIsEnabled1] = useState(false);
     const toggleSwitch1 = () => setIsEnabled1(previousState => !previousState);
  return (
-      <View style={{backgroundColor:"#fff",marginTop:Constant.statusBarHeight}}>
+      <ScrollView style={{backgroundColor:"#fff",marginTop:Constant.statusBarHeight}}>
                 <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>{navigation.navigate("EditProfile")}}>
                     <View style={{padding:15,
                         flexDirection:'row',
@@ -58,7 +58,7 @@ export default function Settings({navigation}) {
                             }} >Saved Routes</Text>
                     </View>
                     <View style={{paddingTop:0}}>
-                        <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" onPress={() =>{navigation.navigate("PlaceOrder")}} />
+                        <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" onPress={() =>{navigation.navigate('Root',{screen:'More'})}} />
                     </View>
                 </View>
                 <View style={{padding:15,
@@ -161,7 +161,7 @@ export default function Settings({navigation}) {
                             }} >User Agreement</Text>
                     </View>
                     <View style={{paddingTop:4}}>
-                        <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" onPress={() =>{navigation.navigate("PlaceOrder")}} />
+                        <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" onPress={() =>{navigation.navigate('Root',{screen:'More'})}} />
                     </View>
                 </View>
                 <View style={{padding:15,
@@ -183,7 +183,7 @@ export default function Settings({navigation}) {
                             }} >Privacy Policy</Text>
                     </View>
                     <View style={{paddingTop:4}}>
-                        <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" onPress={() =>{navigation.navigate('Root',{screen:'PrivacyPolicy'})}} />
+                        <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" onPress={() =>{navigation.navigate('Root',{screen:'More'})}} />
                     </View>
                 </View>
                 <View style={{padding:15,
@@ -205,7 +205,7 @@ export default function Settings({navigation}) {
                             }} >Standard Rates</Text>
                     </View>
                     <View style={{paddingTop:4}}>
-                        <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" onPress={() =>{navigation.navigate("PlaceOrder")}} />
+                        <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" onPress={() =>{navigation.navigate('Root',{screen:'More'})}} />
                     </View>
                 </View>
                 <View style={{padding:15,
@@ -227,7 +227,7 @@ export default function Settings({navigation}) {
                             }} >About Get Trucking</Text>
                     </View>
                     <View style={{paddingTop:4}}>
-                        <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" onPress={() =>{navigation.navigate("PlaceOrder")}} />
+                        <MaterialIcons name="keyboard-arrow-right" size={30} color="#858585" onPress={() =>{navigation.navigate('Root',{screen:'More'})}} />
                     </View>
                 </View>
                 <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>{AsyncStorage.removeItem('LOGIN_TOKEN');navigation.navigate('Root',{screen:"Login"})}}>
@@ -254,6 +254,6 @@ export default function Settings({navigation}) {
                     </View>
                 </View>
                 </TouchableHighlight>
-        </View>
+        </ScrollView>
     );
   }

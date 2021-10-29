@@ -1,14 +1,32 @@
-import React from 'react'
-import {Text,View,StyleSheet, Image,Button,ScrollView} from 'react-native';
+import React,{useEffect} from 'react'
+import {Text,View,StyleSheet, Image,Button,ScrollView,BackHandler} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import Constant from 'expo-constants';
 function ReferEarn({navigation}) {
+
+    function handleBackButtonClick() {
+        navigation.navigate("Settings");
+        return true;
+      }
+    
+
+    useEffect(() => {
+        BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+        return () => {
+          BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
+        };
+      }, []);
+
+
+
+
+
     return (
         <ScrollView style={styles.container}>
             <View style={{flexDirection: 'row'}}>
                 <View style={{flex:1,justifyContent:"center",padding:5,paddingLeft:15}}>
                             <View style={{height:40,width:40,justifyContent:"center",alignItems:"center",borderRadius:9}}>
-                                <Ionicons name="arrow-back-outline" size={24} color="black" onPress={() => {navigation.goBack()}} />
+                                <Ionicons name="arrow-back-outline" size={24} color="black" onPress={() => {navigation.navigate("Settings")}} />
                             </View>       
                 </View>
                 <View style={{flex:8,justifyContent:"center",padding:5}}>

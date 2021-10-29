@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AntDesign,MaterialIcons,Entypo,FontAwesome5,Feather } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { SliderBox } from "react-native-image-slider-box";
 
 function Home({navigation,route}) {
 
@@ -11,16 +12,29 @@ const [element,setElement] = useState([]);
 var key = 'AddStop';
 const [elementkey,setElementKey] = useState(1);
 const [modalVisible, setModalVisible] = useState(false);
-const [locationModal, setLocationModal] = useState(false);
 const [isSelected, setSelection] = useState(true);
 const [pickText,setPickText] = useState('ASAP');
 const [finaldata,setFinalData] = useState([]);
 const [pickup,setPickUp] = useState('Pickup Location');
+const [detailpickup,setDetailpickup] = useState();
+const [detaildrop,setDetaildrop] = useState();
 const [drop,setDrop] = useState('Where to..');
 const [laterDate,setLaterDate] = useState();
 const [date, setDate] = useState(new Date());
 const [mode, setMode] = useState('date');
 const [show, setShow] = useState(false);
+const [day,setDay] = useState(false);
+const [images,setImages] = useState([
+        "https://source.unsplash.com/1024x768/?nature",
+        "https://source.unsplash.com/1024x768/?water",
+        "https://source.unsplash.com/1024x768/?girl",
+        "https://source.unsplash.com/1024x768/?tree",
+    require('../assets/banner1.jpg'),
+    require('../assets/banner2.jpg'),
+])
+
+const [stop,setStop] = useState();
+const [stopDetail,setStopDetail] = useState();
 
 
 function checkZero(data){
@@ -64,13 +78,23 @@ useEffect(() => {
     setFinalData(route.params.finaldata);
     var result = (route.params.finaldata).filter(column => column.type=='PickUp');
     if(result.length>0){
-      setPickUp(result[0].floor);
+      setPickUp(result[0].formatted_address);
+      setDetailpickup(result[0].floor);
     }
     var result = (route.params.finaldata).filter(column => column.type=='Drop');
     if(result.length>0){
-      setDrop(result[0].floor);
+      setDrop(result[0].formatted_address);
+      setDetaildrop(result[0].floor);
+    }
+
+    var result = (route.params.finaldata).filter(column => column.type=='Stop');
+    if(result.length>0){
+      setStop(result[0].formatted_address);
+      setStopDetail(result[0].floor);
     }
   }
+
+
 });
 
 
@@ -82,8 +106,24 @@ useEffect(() => {
   })
 })
 
+useEffect(() => {
+  var today = new Date();
+  var time = today.getHours();
+  if((time >=0 && time<6) ||(time>18 && time<=23)){
+    setDay(false)
+  }else{
+    setDay(true);
+  }
+
+},[])
+
 function selectVehicleClick(){
-    navigation.navigate('Root',{screen:'SelectVehicle',params:{finaldata,asap:pickText}})
+    if(detaildrop && detailpickup){
+      navigation.navigate('Root',{screen:'SelectVehicle',params:{finaldata,asap:pickText}})
+    }else{
+      Alert.alert("Please select pickup and drop location");
+    }
+    
 }
 
 
@@ -94,7 +134,8 @@ const StopLocation = () => (
               <MaterialIcons name="location-pin" size={20} color="black" />
             </View>
             <View style={{width:"93%",paddingLeft:15}}>
-              <Text style={{color:"#8a8a8a",fontWeight:"bold"}}>Stop to...</Text>
+              <Text style={{color:"#8a8a8a",fontWeight:"bold"}}>{stop ? stop : 'Stop to..'}</Text>
+              {stopDetail ? <Text style={{color:"#8a8a8a",fontWeight:"bold"}}>{stopDetail ? stopDetail : 'Stop to..'}Stop to...</Text> : null}
             </View>
             <View>
               <Entypo name="cross" size={20} color="black" onPress={() =>RemoveElement()}/>
@@ -117,26 +158,26 @@ const StopLocation = () => (
 
   return (
     <View style={styles.container}>
+
+      <Image source={day ? require('../assets/day.jpg') : require('../assets/night.jpg')} style={styles.background} />
+
       <View style={styles.headerBar}>
-        <View style={styles.headerIcon}>
-          <AntDesign name="menu-fold" size={24} color="black" onPress={() =>{navigation.openDrawer()}}/>
+        <View style={{justifyContent:"center",alignItems:"center"}}>
+          <Entypo name="menu" size={30} color="white" onPress={() =>{navigation.openDrawer()}}/>
         </View>
         <View style={styles.headerName}>
-            <Text style={{fontSize:16,fontWeight:"bold"}}>Get Trucking</Text>
+            <Text style={{fontSize:16,fontWeight:"bold",color:"white"}}>Get Trucking</Text>
         </View>
-        <View style={styles.headerNotification}>
-          <AntDesign name="bells" size={24} color="black" onPress={() =>{navigation.navigate('Root',{screen: 'Notification'})}}  />
+        <View style={{justifyContent:"center",alignItems:"center"}}>
+          <AntDesign name="bells" size={24} color="white" onPress={() =>{navigation.navigate('Root',{screen: 'Notification'})}}  />
         </View>
       </View>
       <View style={styles.homePageContainer}>
         <ScrollView>
         <View style={styles.imageitem}>
-          <View style={styles.textContainer}>
-            <Text style={{fontSize:25,fontWeight:"bold"}}>Welcome</Text>
-            <Text style={styles.text} numberOfLines={1}>Pawan Kumar Jangid</Text>
-          </View>
           <View style={styles.image}>
-              <Image source={require("../assets/homeBackground.png")} style={{ height:100,width:200,resizeMode:"contain"}} />
+            <SliderBox images={images}  />
+              {/* <Image source={require("../assets/banner2.jpg")} style={{height:"100%",width:"100%",resizeMode:"stretch"}} /> */}
           </View>
         </View>
 
@@ -162,10 +203,7 @@ const StopLocation = () => (
                 animationType="slide"
                 transparent={true}
                 visible={modalVisible}
-                onRequestClose={() => {
-                Alert.alert("Driver Added Successfully");
-                setModalVisible(!modalVisible);
-                }}
+                onRequestClose={() => setModalVisible(!modalVisible)}
             >
                 <View style={styles.centeredView}>
                 <View style={styles.modalView}>
@@ -252,24 +290,23 @@ const StopLocation = () => (
             
             <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={() => {navigation.navigate('Root',{screen:'InitialRegion',params:{type:"PickUp",finaldata}})}}>                     
               <View style={styles.routerContainer}>
-                  <View>
-                    <FontAwesome5 name="dot-circle" size={16} color="black" />
+                  <View style={{justifyContent:"center",alignItems:"center"}}>
+                    <FontAwesome5 name="dot-circle" size={20} color="black" />
                   </View>
                   <View style={{width:"90%",paddingLeft:15}}>
-                    <Text style={{color:"#8a8a8a",fontWeight:"bold"}}>{pickup}</Text>
-                  </View>
-                  <View>
-                      <MaterialIcons name="location-searching" size={20} color="black" />
+                    <Text style={{color:"#8a8a8a",fontWeight:"bold",fontSize:16}}>{pickup}</Text>
+                    {detailpickup ? <Text style={{color:"#8a8a8a",fontWeight:"bold"}}>{detailpickup}</Text> : null}
                   </View>
               </View>
             </TouchableHighlight> 
             <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={() => {navigation.navigate('Root',{screen:'InitialRegion',params:{type:"Drop",finaldata}})}}>     
             <View style={styles.dropContainer}>
-                <View>
-                  <MaterialIcons name="location-pin" size={20} color="black" />
+                <View style={{justifyContent:"center",alignItems:"center"}}>
+                  <MaterialIcons name="location-pin" size={24} color="black" />
                 </View>
                 <View style={{width:"93%",paddingLeft:15}}>
-                  <Text style={{color:"#8a8a8a",fontWeight:"bold"}}>{drop}</Text>
+                  <Text style={{color:"#8a8a8a",fontWeight:"bold",fontSize:16}}>{drop}</Text>
+                  {detaildrop ? <Text style={{color:"#8a8a8a",fontWeight:"bold"}}>{detaildrop}</Text> : null}
                 </View>
             </View>
             </TouchableHighlight>
@@ -278,7 +315,7 @@ const StopLocation = () => (
               {element}
             </View>
             <View style={styles.buttonContainer}>
-              <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>addElement()}>
+              <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' style={{backgroundColor:"rgba(0, 4, 115,0.05)",borderRadius:100}} onPress={()=>addElement()}>
                 <View style={styles.stopTextcontainer}>
                   <Text style={{color:"#3242d1",fontWeight:"bold",fontSize:16}}>+ Add Stop</Text>
                 </View>
@@ -287,15 +324,14 @@ const StopLocation = () => (
           </View>
         </View>
       </ScrollView>
+      </View>
       <View style={styles.bottomContainer}>
-      <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>selectVehicleClick()}>
-          <View style={styles.buttonStyle}>
-            <Text style={{color:"white",fontWeight:"bold"}}>Select Vehicle</Text>
+            <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={()=>selectVehicleClick()}>
+                <View style={styles.buttonStyle}>
+                  <Text style={{color:"white",fontWeight:"bold",fontSize:18}}>Select Vehicle</Text>
+                </View>
+              </TouchableHighlight>
           </View>
-        </TouchableHighlight>
-      </View>
-      
-      </View>
     </View>
   )
 }
@@ -305,14 +341,24 @@ export default Home;
 const styles = StyleSheet.create({
   container: {
     flex:1,
-    marginTop:Constants.statusBarHeight,
-    backgroundColor:"white"
+    backgroundColor:"#000473"
+  },
+  background: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    height: "100%",
+    width:"100%",
+    resizeMode:"stretch"
   },
   headerBar: {
-    flexDirection:"row",
-    justifyContent:"space-around",
     padding:5,
-    paddingTop:15
+    paddingTop:Constants.statusBarHeight+15,
+    flexDirection:"row",
+    backgroundColor:"transparent",
+    justifyContent:"space-around",
+    paddingBottom:10
   },
   headerName:{
     width:"75%",
@@ -324,11 +370,12 @@ const styles = StyleSheet.create({
   },
   imageitem:{
     flexDirection:"row",
-    paddingTop:60,
-    padding:10
+    padding:0
   },
   image:{
-    padding:0
+    padding:0,
+    height:210,
+    width:"100%"
   },
   textContainer:{
     padding:5,
@@ -341,7 +388,12 @@ const styles = StyleSheet.create({
     fontWeight:"bold",
   },
   locationContainer:{
-    padding:30
+    marginTop:-20,
+    margin:30,
+    borderTopLeftRadius:50,
+    borderBottomEndRadius:50,
+    backgroundColor:"white",
+    borderWidth:0.5
   },
   boxContainer:{
     padding:30,
@@ -363,6 +415,8 @@ const styles = StyleSheet.create({
   },
   buttonContainer:{
     padding:15,
+    justifyContent:"center",
+    alignItems:"center"
   },
   stopTextcontainer:{
     padding:13,
@@ -376,11 +430,13 @@ const styles = StyleSheet.create({
     alignItems:"center"
   },
   buttonStyle:{
-    padding:10,
+    padding:20,
     paddingLeft:40,
     paddingRight:40,
     backgroundColor:"#000473",
-    borderRadius:10
+    borderRadius:10,
+    borderWidth:0.8,
+    borderColor:"white"
   },
   locationbuttonStyle:{
     padding:15,

@@ -26,6 +26,10 @@ import MapAndDetail from '../screens/MapAndDetail';
 import Tracking from '../screens/Tracking';
 import PrivacyPolicy from '../screens/PrivacyPolicy';
 import SupportChat from '../screens/SupportChat';
+import FAQ from '../screens/FAQ'
+import FeedBack from '../screens/FeedBack';
+
+
 const Stack = createStackNavigator();
 
 function HomeStack() {
@@ -58,6 +62,8 @@ function HomeStack() {
       <Stack.Screen name="ReferEarn" component={ReferEarn} options={{ swipeEnabled: false }} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} options={{ swipeEnabled: false }} />
       <Stack.Screen name="SupportChat" component={SupportChat} options={{ swipeEnabled: false }} />
+      <Stack.Screen name="FAQ" component={FAQ} options={{ swipeEnabled: false }} />
+      <Stack.Screen name="FeedBack" component={FeedBack} options={{ swipeEnabled: false }} />
     </Stack.Navigator>
   );
 }

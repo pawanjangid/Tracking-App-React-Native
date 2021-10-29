@@ -1,8 +1,8 @@
 import * as React from 'react';
 import {useState} from 'react';
 import { StyleSheet, Text, View,CheckBox,TouchableHighlight } from 'react-native';
-import { AntDesign,MaterialCommunityIcons,Feather } from '@expo/vector-icons'; 
-import { TextInput } from 'react-native';
+import { AntDesign,MaterialCommunityIcons,Feather,Entypo } from '@expo/vector-icons'; 
+import { TextInput,Modal } from 'react-native';
 import { Alert } from 'react-native';
 import Contstant from 'expo-constants'
 export default function Register({navigation}) {
@@ -20,11 +20,21 @@ export default function Register({navigation}) {
     const [userOTP,setUserOTP] = useState();
     const [otp,setOTP] = useState(100000 + Math.floor(Math.random() * 900000));
     const [verification,setVerification] = useState(true);
+    const [otpModal,setOtpModal] = useState(false);
+    const [otpVerify,setOTPVerify] = useState(false);
 
+
+
+    function verificationOTP(){
+        if(userOTP==otp){
+            setOTPVerify(true);
+        }
+    }
 
 
     function PressHandler() {
-        if(verification){
+        
+        if(verification&&otpVerify){
             if(termCheck && policyCheck){
                 if(phone.length===10){
                     fetch('https://gettruckingbackend.herokuapp.com/users/', {
@@ -62,9 +72,9 @@ export default function Register({navigation}) {
     }
 
     function sendOTP(){
-       
-        var url = "http://gateway.onewaysms.com.au:10001/api.aspx?apiusername=APIXTDN4S5ADS&apipassword=APIXTDN4S5ADSXTDN4&senderid=TEST&mobileno="+phone+"&message=Your one time password is"+otp+"&languagetype=1"
 
+        var url = "http://gateway.onewaysms.sg:10002/api.aspx?apiusername=APIXTDN4S5ADS&apipassword=APIXTDN4S5ADSXTDN4&senderid=TEST&mobileno=+"+phone+"&message=Your one time password is "+otp+"&languagetype=1"
+        console.log(url);
         fetch(url, {
             method: 'GET'
         })
@@ -98,16 +108,66 @@ export default function Register({navigation}) {
                             onChangeText={(e)=>{setPhone(e)}}
                             keyboardType="numeric"
                             />
-                            <View style={{width:30}}>
-                                
+                            <View style={{width:40,justifyContent: 'center',backgroundColor:"#000473",padding:2,borderRadius:10,alignItems: "center"}}>
+                                <TouchableHighlight style={{}} onPress={()=>{setOtpModal(!otpModal);sendOTP()}}>
+                                    <View>
+                                        <Text style={{fontSize:14,color:"white"}}>Verify</Text>
+                                    </View>
+                                </TouchableHighlight>
                             </View>
                     </View>
+
+
+
+                    {/* Verify Modal */}
+
+                    <Modal
+                        animationType="slide"
+                        transparent={true}
+                        visible={otpModal}
+                        onRequestClose={() => {
+                        setOtpModal(!otpModal);
+                        }}
+                    >
+                        <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View >
+                                <Text style={{fontSize:18}}>
+                                    Enter OTP for verification
+                                </Text>
+                                <View style={styles.Inputcontainer}>
+                                        <View style={styles.iconContainer}>
+                                            <Entypo name="time-slot" size={24} color="#878787" />
+                                        </View>
+                                        <TextInput style={styles.textinput}
+                                        placeholder="Enter OTP"
+                                        placeholderTextColor="#878787"
+                                        value={userOTP}
+                                        onChangeText={(e)=>{setUserOTP(e)}}
+                                        keyboardType="numeric"
+                                        />
+                                </View>
+                                <View style={{justifyContent:"center",alignItems:"center"}}>
+                                    <TouchableHighlight style={[styles.CloseContainer,{backgroundColor:"red"}]} onPress={() =>{setOtpModal(!otpModal);verificationOTP()}}>
+                                        <View>
+                                            <Text style={{fontWeight:"bold",color:"white"}}>Submit</Text>
+                                        </View>
+                                    </TouchableHighlight> 
+                                </View>
+                            </View>
+                        </View>
+                        </View>
+                    </Modal>
+
+
+
+                {/* End Verify Modal */}
                     <View style={styles.Inputcontainer}>
                             <View style={styles.iconContainer}>
                                 <Feather name="smartphone" size={24} color="#878787" />
                             </View>
                             <TextInput style={styles.textinput}
-                            placeholder="Email (Optional)"
+                            placeholder="Email"
                             placeholderTextColor="#878787"
                             autoCompleteType="email"
                             value={mail}
@@ -216,7 +276,7 @@ const styles = StyleSheet.create({
         borderRadius:10
      },
      textinput:{
-        width:"85%",
+        width:"80%",
         backgroundColor:'#fff',
         padding:3,
         borderRadius:10,
@@ -241,11 +301,12 @@ const styles = StyleSheet.create({
     buttonContainer:{
         alignItems: "center",
         marginTop:20,
-        backgroundColor:'#424fff',
+        backgroundColor:'#000473',
         padding:15,
         marginRight:30,
         marginLeft:30,
-        borderRadius:30
+        borderBottomLeftRadius:60,
+        borderTopEndRadius:60
     },
     buttontitle:{
         fontSize:20,
@@ -260,6 +321,34 @@ const styles = StyleSheet.create({
         fontSize:16,
         fontWeight:"bold",
         color:"black"
-    }
-     
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: "flex-end",
+        backgroundColor: 'rgba(0,0,0,0.3)'
+      },
+    modalView: {
+        backgroundColor: "white",
+        borderTopLeftRadius:20,
+        borderTopRightRadius:20,
+        padding: 20,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+      },
+      CloseContainer:{
+        alignItems: "center",
+        marginTop:20,
+        backgroundColor:'#000473',
+        padding:15,
+        marginRight:30,
+        marginLeft:30,
+        borderRadius:30
+    },
   });

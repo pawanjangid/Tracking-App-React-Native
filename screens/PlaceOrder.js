@@ -28,9 +28,9 @@ export default function Wallet({navigation,route})  {
         setIsEnabled(previousState => !previousState)
     }
     function handleBackButtonClick() {
-        navigation.goBack();
+       navigation.goBack();
         return true;
-      }
+      } 
     const [balanceModal,setBalanceModal] = useState(false);
     const [driveNote,setDriverNote] = useState('No any Note');
     const [noteModal,setNoteModal] = useState(false);
@@ -40,7 +40,7 @@ export default function Wallet({navigation,route})  {
     const [walletamount,setWalletAmount] = useState(400);
     const [walletSelect,setWalletSelect] = useState(false);
     const [online,setOnline] = useState(false);
-
+    const [pickup,setPickUp] = useState();
 
     function toggleMethod(){
         if(walletSelect){
@@ -52,18 +52,27 @@ export default function Wallet({navigation,route})  {
         }
     }
 
-      const [pickup,setPickUp] = useState();
-      useEffect(() => {
-        var pickup = route.params.selectedItem.finaldata.filter(item=>item.type === 'PickUp');
-        setPickUp(pickup[0]);
-        BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
-        return () => {
-          BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
-        };
-      }, []);
+      
+            useEffect(() => {
+                    BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+                    return () => {
+                    BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
+                    }
+            }, []);
 
 
       useEffect(() => {
+
+
+        
+                
+            var pickup = route.params.finaldata.filter(item=>item.type === 'PickUp');
+            setPickUp(pickup[0]);
+                    
+                
+
+
+
         AsyncStorage.getItem('LOGIN_TOKEN').then((value) => {
           if(value!==null){
             fetch('https://gettruckingbackend.herokuapp.com/users/favoriteDriver', {
@@ -90,13 +99,16 @@ export default function Wallet({navigation,route})  {
         })
       },[])
 
-    const [vehicle_id,setVehicleId] = useState(route.params.selectedItem.item.vehicle_id);
-    const [asap,setASAP] = useState(route.params.selectedItem.asap);
-    const [locations,setLocations] = useState(route.params.selectedItem.finaldata);
+    const [vehicle_id,setVehicleId] = useState(route.params.selectedItem.vehicle_id);
+    const [asap,setASAP] = useState(route.params.asap);
+    const [locations,setLocations] = useState(route.params.finaldata);
     const [message,setMessage]=useState();
     const [driverModal,setDriverModal] = useState(false);
     const [coupon,setCoupon] = useState();
     const [couponModal,setCouponModal] = useState(false);
+
+
+
 
 
     function onsubmitHandler(){
@@ -188,8 +200,8 @@ export default function Wallet({navigation,route})  {
                 transparent={true}
                 visible={driverModal}
                 onRequestClose={() => {
-                Alert.alert("Modal has been closed.");
                 setDriverModal(!driverModal);
+                toggleSwitch()
                 }}
             >
                 <View style={styles.centeredView}>
@@ -226,7 +238,6 @@ export default function Wallet({navigation,route})  {
                         transparent={true}
                         visible={noteModal}
                         onRequestClose={() => {
-                            Alert.alert("Modal has been closed.");
                             setNoteModal(!noteModal);
                         }}
                         >
@@ -255,7 +266,6 @@ export default function Wallet({navigation,route})  {
                         transparent={true}
                         visible={balanceModal}
                         onRequestClose={() => {
-                            Alert.alert("Are you sure to cancel ..");
                             setBalanceModal(!balanceModal);
                         }}
                         >
@@ -301,7 +311,10 @@ export default function Wallet({navigation,route})  {
                 <View style={{padding:5}}>
                 <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>{setNoteModal(!noteModal)}}>
                     <View style={{padding:10,flexDirection:"row",justifyContent:"space-around"}}>
-                        <MaterialIcons name="chat" size={24} color="#000473" />
+                        <View style={{justifyContent:"center"}}>
+                            <MaterialIcons name="chat" size={24} color="#000473" />
+                        </View>
+                        
                         <View style={{width:"70%"}}>
                             <Text style={{padding:3,paddingLeft:0,fontSize:16}}>Add notes to your driver</Text>
                             <Text numberOfLines={1} style={{fontSize:12}}>{driveNote}</Text>
@@ -314,7 +327,10 @@ export default function Wallet({navigation,route})  {
                 <View style={{padding:5}}>
                 <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>{console.log('hello')}}>
                     <View style={{padding:10,flexDirection:"row",justifyContent:"space-around"}}>
-                        <FontAwesome5 name="phone" size={24} color="#000473" />
+                        <View style={{justifyContent:"center",alignItems:"center"}}>
+                            <FontAwesome5 name="phone" size={24} color="#000473" />
+                        </View>
+                        
                         <View style={{width:"70%"}}>
                             <Text style={{padding:3,paddingLeft:0,fontSize:16}}>945984759</Text>
                             <Text style={{fontSize:12}}>Order Contact Number</Text>
@@ -330,7 +346,7 @@ export default function Wallet({navigation,route})  {
                     borderBottomWidth:1,
                     borderBottomColor:"#f5f5f5"
                     }}>
-                    <View style={{justifyContent:'center'}}>
+                    <View style={{justifyContent:'center',alignItems: 'center'}}>
                         <MaterialIcons name="favorite" size={24} color="#000473" />
                     </View>
                     <View style={{width:"70%",justifyContent:'center'}}>
@@ -356,18 +372,7 @@ export default function Wallet({navigation,route})  {
                             />
                     </View>
                 </View>
-                <View style={{padding:5}}>
-                    <TouchableHighlight underlayColor='rgba(73,182,77)' onPress={()=>{console.log('hello')}}>
-                        <View style={{padding:10,flexDirection:"row",justifyContent:"space-around"}}>
-                            <FontAwesome5 name="dollar-sign" size={24} color="#000473" />
-                            <View style={{width:"70%"}}>
-                                <Text style={{padding:3,paddingLeft:0,fontSize:16}}>Select payment method</Text>
-                            </View>
-                            
-                            <MaterialIcons name="keyboard-arrow-right" size={24} color="black" />
-                        </View>
-                    </TouchableHighlight>
-                </View>
+                
 
                 <Modal
                         animationType="slide"

@@ -1,7 +1,8 @@
 import React from "react"
 import { StyleSheet,Text,View,Image,ImageBackground, TouchableHighlight} from "react-native"
-import Constants from "expo-constants"
 import { FontAwesome5,MaterialIcons } from "@expo/vector-icons";
+//import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+
 
 
 function GetStart({navigation}) {
@@ -15,6 +16,25 @@ function GetStart({navigation}) {
             
         )
     }
+
+
+    // signIn = async () => {
+    //     try {
+    //       await GoogleSignin.hasPlayServices();
+    //       const userInfo = await GoogleSignin.signIn();
+    //       this.setState({ userInfo });
+    //     } catch (error) {
+    //       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+    //         // user cancelled the login flow
+    //       } else if (error.code === statusCodes.IN_PROGRESS) {
+    //         // operation (e.g. sign in) is in progress already
+    //       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+    //         // play services not available or outdated
+    //       } else {
+    //         // some other error happened
+    //       }
+    //     }
+    //   };
 
     const image = require('../assets/truck.png');
 
@@ -35,7 +55,7 @@ function GetStart({navigation}) {
                     </View>
                     <View style={styles.socialContainer}>
                         <View style={styles.googleContainer}>
-                            <FontAwesome5 name="google" size={24} color="#4b5fe3" />
+                            <FontAwesome5 name="google" size={24} color="#4b5fe3" onPress={()=>{signIn()}} />
                         </View>
                         <View style={styles.facebookContainer}>
                             <FontAwesome5 name="facebook" size={24} color="#0015a1" />
